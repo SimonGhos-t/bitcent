@@ -1,0 +1,5 @@
+usado npm install @tabler/icons/react para os ícones
+usado npm install uuid para gerar os id's
+usado npm i -D uuid para dependência de desenvolvimento
+usado npm i firebase para o banco de dados
+usado npm install @mantine/core @mantine/hooks @mantine/dates dayjs para interfaces de usuário
