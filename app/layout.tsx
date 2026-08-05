@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import '@mantine/dates/styles.css'
 import '@mantine/core/styles.css'
 import { Nunito } from 'next/font/google'
 import './globals.css'
@@ -22,9 +23,9 @@ export default function RootLayout({
 	return (
 		<html lang="pt-BR" className={`${fontNunito} h-full antialiased`}>
 			<body className="min-h-full flex flex-col">
-				<AutenticacaoProvider>
-					<MantineProvider forceColorScheme="dark">{children}</MantineProvider>
-				</AutenticacaoProvider>
+				<MantineProvider forceColorScheme="dark">
+					<AutenticacaoProvider>{children}</AutenticacaoProvider>
+				</MantineProvider>
 			</body>
 		</html>
 	)
