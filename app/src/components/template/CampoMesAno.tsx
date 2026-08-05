@@ -50,27 +50,24 @@ export default function CampoMesAno(props: CampoMesAnoProps) {
 	}
 
 	return (
-		<div className="flex items-center gap-2">
-			<Button
-				className={`
-                flex justify-center items-center bg-red-500
-                text-white cursor-pointer p-1
-            `}
-				color="red"
-				onClick={decrementar}
+		<div className="flex items-center gap-1 h-12">
+			<button
+				onClick={incrementar}
+				className="flex justify-center items-center bg-[#424242]
+                text-white cursor-pointer h-9 w-5 rounded-sm"
 			>
 				<IconChevronLeft size={14} />
-			</Button>
+			</button>
 			<Popover withArrow>
 				<Popover.Target>
 					<Button
 						className={`
                         bg-linear-to-r from-indigo-600 to-cyan-600
                         text-white cursor-pointer select-none 
-                        w-20 md:w-44 text-xs md:text-base px-0 md:px-3
+                        md:w-44 text-xs md:text-base px-0 md:px-3
                     `}
 					>
-						<span className="inline">{Data.mmyy.formatar(data)}</span>
+						<span>{Data.mmyy.formatar(data)}</span>
 					</Button>
 				</Popover.Target>
 				<Popover.Dropdown>
@@ -94,16 +91,13 @@ export default function CampoMesAno(props: CampoMesAnoProps) {
 					</div>
 				</Popover.Dropdown>
 			</Popover>
-			<Button
-				className={`
-                flex justify-center items-center 
-                text-white cursor-pointer
-            `}
-				color="red"
+			<button
 				onClick={incrementar}
+				className="flex justify-center items-center bg-[#424242]
+                text-white cursor-pointer h-9 w-5 rounded-sm"
 			>
 				<IconChevronRight size={14} />
-			</Button>
+			</button>
 		</div>
 	)
 }

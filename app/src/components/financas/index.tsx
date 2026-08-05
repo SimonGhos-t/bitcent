@@ -27,15 +27,10 @@ export default function Finanças() {
 	} = UseTransacao()
 
 	function renderizarBotoes() {
-
 		return (
 			<div className="flex justify-between items-center">
 				<CampoMesAno data={data} dataMudou={alterarData} />
 				<div className="flex justify-center items-center gap-2">
-					<Button className="bg-blue-500 p-0" onClick={() => selecionar(transacaoVazia)}>
-						<IconPlus />
-						<span className="sm:inline hidden pl-1">Nova Transação</span>
-					</Button>
 					<SegmentedControl
 						data={[
 							{ label: <IconList />, value: 'lista' },
@@ -60,7 +55,11 @@ export default function Finanças() {
 		<Pagina>
 			<Cabecalho />
 			<Conteudo className="gap-5">
-			<Resumo transacoes={transacoes} className="mb-7" />
+				<Button className="bg-blue-500 max-w-xl" onClick={() => selecionar(transacaoVazia)}>
+					<IconPlus />
+					<span>Nova Transação</span>
+				</Button>
+				<Resumo transacoes={transacoes} className="mb-7" />
 				{renderizarBotoes()}
 				{transacaoSelecionada ? (
 					<Formulario

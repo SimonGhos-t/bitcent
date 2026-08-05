@@ -32,7 +32,7 @@ export default function Formularios() {
 				podeSalvar={Texto.entre(dados.nome, 3, 80)}
 				salvar={salvar}
 			>
-				<TextInput value={dados.nome} onChange={alterarAtributo('nome')} />
+				<TextInput value={dados.nome ?? ''} onChange={alterarAtributo('nome')} />
 			</MiniFormulario>
 			<MiniFormulario
 				titulo="Seu CPF"
