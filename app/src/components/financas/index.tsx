@@ -11,7 +11,6 @@ import { IconLayoutGrid, IconList, IconPlus } from '@tabler/icons-react'
 import UseTransacao, { TipoExibicao } from '../../data/hooks/useTransacao'
 import CampoMesAno from '../template/CampoMesAno'
 import Grade from './Grade'
-import ResumoItem from './ResumoItem'
 import Resumo from './Resumo'
 
 export default function Finanças() {
@@ -28,16 +27,14 @@ export default function Finanças() {
 	} = UseTransacao()
 
 	function renderizarBotoes() {
+
 		return (
-			<div className="flex justify-between">
-				<CampoMesAno data={data} dataMudou={alterarData} />				
-				<div className="flex gap-5">
-					<Button
-						className="bg-blue-500"
-						leftSection={<IconPlus />}
-						onClick={() => selecionar(transacaoVazia)}
-					>
-						Nova Transação
+			<div className="flex justify-between items-center">
+				<CampoMesAno data={data} dataMudou={alterarData} />
+				<div className="flex justify-center items-center gap-2">
+					<Button className="bg-blue-500 p-0" onClick={() => selecionar(transacaoVazia)}>
+						<IconPlus />
+						<span className="sm:inline hidden pl-1">Nova Transação</span>
 					</Button>
 					<SegmentedControl
 						data={[
@@ -75,7 +72,7 @@ export default function Finanças() {
 				) : transacoes.length ? (
 					renderizarTransacoes()
 				) : (
-					<NaoEncontrado>Nenhum transação encontrada</NaoEncontrado>
+					<NaoEncontrado>Nenhuma transação encontrada</NaoEncontrado>
 				)}
 			</Conteudo>
 		</Pagina>

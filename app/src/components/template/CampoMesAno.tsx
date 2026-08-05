@@ -70,8 +70,7 @@ export default function CampoMesAno(props: CampoMesAnoProps) {
                         w-20 md:w-44 text-xs md:text-base px-0 md:px-3
                     `}
 					>
-						<span className="hidden md:inline">{Data.mmyy.formatar(data)}</span>
-						{/* <span className="inline md:hidden">{Data.mmyy.formatar(data, true)}</span> */}
+						<span className="inline">{Data.mmyy.formatar(data)}</span>
 					</Button>
 				</Popover.Target>
 				<Popover.Dropdown>
@@ -97,8 +96,8 @@ export default function CampoMesAno(props: CampoMesAnoProps) {
 			</Popover>
 			<Button
 				className={`
-                flex justify-center items-center bg-red-500
-                text-white cursor-pointer p-1
+                flex justify-center items-center 
+                text-white cursor-pointer
             `}
 				color="red"
 				onClick={incrementar}

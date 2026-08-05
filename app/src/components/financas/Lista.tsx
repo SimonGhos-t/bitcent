@@ -21,7 +21,6 @@ export default function Lista(props: ListaProps) {
 	}
 	
 	function renderizarLinha(transacao: Transacao, indice: number) {
-		console.log(transacao.data)
 		return (
 			<div
 				key={transacao.id}
