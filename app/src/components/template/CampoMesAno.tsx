@@ -52,7 +52,7 @@ export default function CampoMesAno(props: CampoMesAnoProps) {
 	return (
 		<div className="flex items-center gap-1 h-12">
 			<button
-				onClick={incrementar}
+				onClick={decrementar}
 				className="flex justify-center items-center bg-[#424242]
                 text-white cursor-pointer h-9 w-5 rounded-sm"
 			>

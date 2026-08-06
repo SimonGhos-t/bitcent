@@ -11,7 +11,7 @@ export default function Vantagens() {
 				<Vantagem
 					imagem={vantagem1}
 					titulo="Gerenciador financeiro completo e simples de usar"
-					subtitulo="Aqui você consegue ter controle completo das suas finanças e uma visualização fácil de entender. o caminho da economia começa aqui!"
+					subtitulo="Aqui você consegue ter controle completo das suas finanças e uma visualização fácil de entender. O caminho da economia começa aqui!"
 				/>
 				<Vantagem
 					imagem={vantagem2}

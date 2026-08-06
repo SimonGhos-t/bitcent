@@ -8,7 +8,7 @@ export type TipoExibicao = 'lista' | 'grade'
 export default function UseTransacao() {
 	const { usuario } = useContext(AutenticacaoContext)
 	const [data, setData] = useState<Date>(new Date())
-	const [tipoExibicao, setTipoExibicao] = useState<TipoExibicao>('lista')
+	const [tipoExibicao, setTipoExibicao] = useState<TipoExibicao>('grade')
 	const [transacoes, setTransacoes] = useState<Transacao[]>([])
 	const [transacaoSelecionada, setTransacao] = useState<Transacao | null>(null)
 

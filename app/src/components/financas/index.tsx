@@ -33,8 +33,8 @@ export default function Finanças() {
 				<div className="flex justify-center items-center gap-2">
 					<SegmentedControl
 						data={[
-							{ label: <IconList />, value: 'lista' },
 							{ label: <IconLayoutGrid />, value: 'grade' },
+							{ label: <IconList />, value: 'lista' },
 						]}
 						onChange={(tipo) => alterarTipoExibicao(tipo as TipoExibicao)}
 					/>
@@ -44,10 +44,10 @@ export default function Finanças() {
 	}
 
 	function renderizarTransacoes() {
-		return tipoExibicao === 'lista' ? (
-			<Lista transacoes={transacoes} selecionarTransacao={selecionar} />
-		) : (
+		return tipoExibicao === 'grade' ? (
 			<Grade transacoes={transacoes} selecionarTransacao={selecionar} />
+		) : (
+			<Lista transacoes={transacoes} selecionarTransacao={selecionar} />
 		)
 	}
 
@@ -55,11 +55,11 @@ export default function Finanças() {
 		<Pagina>
 			<Cabecalho />
 			<Conteudo className="gap-5">
+				<Resumo transacoes={transacoes} className="mb-5" />
 				<Button className="bg-blue-500 max-w-xl" onClick={() => selecionar(transacaoVazia)}>
 					<IconPlus />
 					<span>Nova Transação</span>
 				</Button>
-				<Resumo transacoes={transacoes} className="mb-7" />
 				{renderizarBotoes()}
 				{transacaoSelecionada ? (
 					<Formulario
