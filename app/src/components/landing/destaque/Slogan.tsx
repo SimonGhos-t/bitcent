@@ -1,11 +1,13 @@
+import AutenticacaoContext from '@/app/src/data/contexts/AutenticacaoContext'
 import { IconArrowRight, IconVideo } from '@tabler/icons-react'
+import Link from 'next/link'
+import { useContext } from 'react'
 
 export default function Slogan() {
+	const { loginGoogle } = useContext(AutenticacaoContext)
 	return (
 		<div className="flex flex-col justify-center gap-5">
-			<div
-				className="flex flex-col items-center md:items-start text-4xl lg:text-6xl text-white font-light"
-			>
+			<div className="flex flex-col items-center md:items-start text-4xl lg:text-6xl text-white font-light">
 				<div className="flex gap-2.5">
 					<div className={`relative`}>
 						<span className="absolute bottom-1 left-0 w-full border-b-8 border-purple-500 -rotate-2"></span>
@@ -33,16 +35,18 @@ export default function Slogan() {
 					className="flex items-center justify-center cursor-pointer
                     bg-linear-to-r from-indigo-600 to-cyan-600 text-white px-5 py-2.5 rounded-md"
 				>
-					<span className="font-thin md:text-sm text-base">
+					<span className="font-thin md:text-sm text-base" onClick={loginGoogle}>
 						Iniciar <span className="hidden sm:inline">Agora</span>
 					</span>
 					<IconArrowRight className="hidden lg:inline" stroke={1} />
 				</div>
 				<div className="flex items-center gap-2 cursor-pointer text-zinc-300 px-5 py-2.5">
 					<IconVideo stroke={1} />
-					<span className="font-thin md:text-sm text-base">
-						<span className="hidden sm:inline">Assista o</span> Vídeo
-					</span>
+					<Link href="https://www.youtube.com/watch?v=HSXcvFVtsdM">
+						<span className="font-thin md:text-sm text-base">
+							<span className="hidden sm:inline">Assista o</span> Vídeo
+						</span>
+					</Link>
 				</div>
 			</div>
 		</div>
