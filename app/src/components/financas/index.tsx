@@ -54,7 +54,7 @@ export default function Finanças() {
 	return (
 		<Pagina>
 			<Cabecalho />
-			<Conteudo className="gap-5">
+			<Conteudo className="gap-4">
 				<Resumo transacoes={transacoes} className="mb-5" />
 				<Button className="bg-blue-500 max-w-xl" onClick={() => selecionar(transacaoVazia)}>
 					<IconPlus />

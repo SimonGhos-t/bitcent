@@ -13,7 +13,7 @@ export default function ResumoItem(props: ResumoItemProps) {
 	return (
 		<div
 			className="relative flex flex-col bg-black pt-4 pb-3 px-5 rounded-lg
-            border border-zinc-800 text-white"
+            border border-zinc-800 text-white shadow shadow-blue-950"
 		>
 			<div className="text-sm text-zinc-500">{props.titulo}</div>
 			<div className="flex justify-between items-center">

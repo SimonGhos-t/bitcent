@@ -6,8 +6,7 @@ import { useContext } from 'react'
 import AutenticacaoContext from '../../data/contexts/AutenticacaoContext'
 
 export default function MenuUsuario() {
-
-	const { usuario, logout} = useContext(AutenticacaoContext)
+	const { usuario, logout } = useContext(AutenticacaoContext)
 	return (
 		<Menu shadow="md" width={200}>
 			<Menu.Target>
@@ -16,14 +15,7 @@ export default function MenuUsuario() {
 						<span className="text-sm font-bold text-zinc-200">{usuario?.nome}</span>
 						<span className="text-xs text-zinc-400">{usuario?.email}</span>
 					</div>
-					<Avatar
-						size={40}
-						radius={'xl'}
-						src={
-							usuario?.imagemUrl ??
-							'https://source.unsplash.com/random/100x100/?abstract'
-						}
-					/>
+					<Avatar size={40} radius={'xl'} src={usuario?.imagemUrl ?? ''} />
 					<IconChevronRight />
 				</div>
 			</Menu.Target>

@@ -22,26 +22,34 @@ export default function Resumo(props: ResumoProps) {
 	const total = receitas - despesas
 
 	return (
-		<div className={`grid grid-cols-1 lg:grid-cols-3 gap-4 ${props.className ?? ''}`}>
-			<ResumoItem
-				titulo="Receitas"
-				valor={receitas}
-				icone={<IconCash />}
-				iconeClassName="text-green-500"
-			/>
-			<ResumoItem
-				titulo="Despesas"
-				valor={despesas}
-				icone={<IconCreditCard />}
-				iconeClassName="text-red-500"
-			/>
-			<ResumoItem
-				titulo="Total"
-				valor={total}
-				icone={<IconArrowsDoubleNeSw />}
-				iconeClassName="text-blue-500"
-				valorClassName={total > 0 ? 'text-green-400' : total < 0 ? 'text-red-400' : ''}
-			/>
+		<div className="flex flex-col">
+			<div className="flex items-center mb-2">
+				<span className="text-zinc-400 pr-3 py-1 border-t border-r border-zinc-800 rounded-r-lg">
+					Seu resumo mensal
+				</span>
+				<div className="flex flex-1 h-3 border-b border-l rounded-l-lg border-zinc-800 self-end"></div>
+			</div>
+			<div className={`grid grid-cols-1 lg:grid-cols-3 gap-3 ${props.className ?? ''}`}>
+				<ResumoItem
+					titulo="Receitas"
+					valor={receitas}
+					icone={<IconCash />}
+					iconeClassName="text-green-500"
+				/>
+				<ResumoItem
+					titulo="Despesas"
+					valor={despesas}
+					icone={<IconCreditCard />}
+					iconeClassName="text-red-500"
+				/>
+				<ResumoItem
+					titulo="Total"
+					valor={total}
+					icone={<IconArrowsDoubleNeSw />}
+					iconeClassName="text-blue-500"
+					valorClassName={total > 0 ? 'text-green-400' : total < 0 ? 'text-red-400' : ''}
+				/>
+			</div>
 		</div>
 	)
 }

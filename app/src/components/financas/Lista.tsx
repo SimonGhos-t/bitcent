@@ -12,7 +12,7 @@ export default function Lista(props: ListaProps) {
 	function renderizarTipo(transacao: Transacao) {
 		return (
 			<span
-				className={`flex justify-center items-center h-8 w-8 sm:w-10 sm:h-10 rounded-full 
+				className={`flex justify-center items-center h-8 w-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-full
                     ${transacao.tipo === 'receita' ? 'bg-green-500' : 'bg-red-500'}`}
 			>
 				{transacao.tipo === 'receita' ? <IconTrendingUp /> : <IconTrendingDown />}
@@ -24,7 +24,7 @@ export default function Lista(props: ListaProps) {
 		return (
 			<div
 				key={transacao.id}
-				className={`flex items-center gap-3 p-1.5 px-7 cursor-pointer ${indice % 2 === 0 ? 'bg-zinc-900' : 'bg-zinc-800'}`}
+				className={`flex items-center gap-3 p-1.5 px-2 md:px-7 cursor-pointer ${indice % 2 === 0 ? 'bg-zinc-900' : 'bg-zinc-800'}`}
 				onClick={() => props.selecionarTransacao?.(transacao)}
 			>
 				{renderizarTipo(transacao)}
