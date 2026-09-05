@@ -1,7 +1,7 @@
 import ResumoItem from './ResumoItem'
 import Transacao from '../../logic/core/financas/Transacao'
 import { TipoTransacao } from '../../logic/core/financas/TipoTransacao'
-import { IconArrowsDoubleNeSw, IconCash, IconCreditCard } from '@tabler/icons-react'
+import { IconArrowsDoubleNeSw, IconCashPlus, IconCreditCard, IconPigMoney } from '@tabler/icons-react'
 
 interface ResumoProps {
 	transacoes: Transacao[]
@@ -24,16 +24,17 @@ export default function Resumo(props: ResumoProps) {
 	return (
 		<div className="flex flex-col">
 			<div className="flex items-center mb-2">
-				<span className="text-zinc-400 pr-3 py-1 border-t border-r border-zinc-800 rounded-r-lg">
+				<span className="text-zinc-400 pr-3 py-1 border-t border-zinc-800 rounded-r-lg">
 					Seu resumo mensal
 				</span>
-				<div className="flex flex-1 h-3 border-b border-l rounded-l-lg border-zinc-800 self-end"></div>
+				<div className="border-l border-zinc-800 h-4"></div>
+				<div className="flex flex-1 h-3 border-b rounded-l-lg border-zinc-800 self-end"></div>
 			</div>
-			<div className={`grid grid-cols-1 lg:grid-cols-3 gap-3 ${props.className ?? ''}`}>
+			<div className={`grid grid-cols-1 lg:grid-cols-2 gap-3 ${props.className ?? ''}`}>
 				<ResumoItem
 					titulo="Receitas"
 					valor={receitas}
-					icone={<IconCash />}
+					icone={<IconCashPlus />}
 					iconeClassName="text-green-500"
 				/>
 				<ResumoItem
@@ -41,6 +42,13 @@ export default function Resumo(props: ResumoProps) {
 					valor={despesas}
 					icone={<IconCreditCard />}
 					iconeClassName="text-red-500"
+				/>
+				<ResumoItem
+					titulo="Guardado / Investido"
+					valor={total}
+					icone={<IconPigMoney/>}
+					iconeClassName="text-green-500"
+					valorClassName={total > 0 ? 'text-green-400' : total === 0 ? 'text-red-400' : ''}
 				/>
 				<ResumoItem
 					titulo="Total"

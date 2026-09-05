@@ -10,14 +10,7 @@ interface PaginaProps {
 
 export default function Pagina(props: PaginaProps) {
 	function renderizar() {
-		return (
-			<div
-				className={`flex flex-col min-h-screen bg-linear-to-r from-zinc-900 via-black to-zinc-900
-            ${props.className ?? ''}`}
-			>
-				{props.children}
-			</div>
-		)
+		return <div className={`flex min-h-screen ${props.className ?? ''}`}>{props.children}</div>
 	}
 
 	return props.externa ? renderizar() : <ForcarAutenticacao>{renderizar()}</ForcarAutenticacao>
