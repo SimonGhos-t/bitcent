@@ -7,47 +7,24 @@ import { DatePickerInput } from '@mantine/dates'
 import { TipoTransacao } from '../../logic/core/financas/TipoTransacao'
 import { IconClipboardText } from '@tabler/icons-react'
 import useFormulario from '../../data/hooks/useFormulario'
-import { Timestamp } from 'firebase/firestore'
 
-interface FormularioProps {
+interface EditarTransacaoProps {
 	transacao: Transacao
+    fechar?: () => void
 	salvar?: (transacao: Transacao) => void
 	excluir?: (transacao: Transacao) => void
 	cancelar?: () => void
 }
 
-export default function Formulario(props: FormularioProps) {
-	const { dados, alterarAtributo } = useFormulario<Transacao>(props.transacao)
+export default function EditarTransacao(props: EditarTransacaoProps) {
+	const { dados, alterarAtributo, transformarDataFiresbase } = useFormulario<Transacao>(
+		props.transacao,
+	)
 
-	function transformarDataFiresbase(data: any): Date | null {
-		if (!data) return null
-
-		// Se for Timestamp do Firebase
-		if (data instanceof Timestamp) {
-			return data.toDate()
-		}
-
-		// Se for Date
-		if (data instanceof Date) {
-			return data
-		}
-
-		// Se for string ISO
-		if (typeof data === 'string') {
-			const partes = data.split('-')
-			if (partes.length === 3) {
-				const [ano, mes, dia] = partes.map(Number)
-				return new Date(ano, mes - 1, dia)
-			}
-		}
-
-		return null
-	}
-	
 	return (
 		<div className="flex flex-col border bg-black border-zinc-700 rounded-xl overflow-hidden">
 			<div className="flex gap-1 bg-zinc-900 py-2 px-7 text-zinc-400">
-				<IconClipboardText stroke={1} /> Formulário
+				<IconClipboardText stroke={1} /> Editar transação
 			</div>
 			<div className="flex flex-col gap-4 p-4 sm:p-7">
 				<TextInput
@@ -71,6 +48,7 @@ export default function Formulario(props: FormularioProps) {
 					<Group onChange={alterarAtributo('tipo')}>
 						<Radio value={TipoTransacao.RECEITA} label="Receita" />
 						<Radio value={TipoTransacao.DESPESA} label="Despesa" />
+						<Radio value={TipoTransacao.GUARDADO} label="Guardado" />
 					</Group>
 				</Radio.Group>
 			</div>
@@ -78,23 +56,14 @@ export default function Formulario(props: FormularioProps) {
 				<Button
 					className="bg-green-500"
 					color="green"
-					onClick={() => props.salvar?.(dados)}
+					onClick={() => {props.salvar?.(dados), props.fechar?.()}}
 				>
 					Salvar
 				</Button>
-				<Button className="bg-gray-500" color="gray" onClick={props.cancelar}>
-					Voltar
-				</Button>
 				<div className="flex flex-1"></div>
-				{dados.id && (
-					<Button
-						className="bg-red-500"
-						color="red"
-						onClick={() => props.excluir?.(dados)}
-					>
-						Excluir
-					</Button>
-				)}
+				<Button className="bg-red-500" color="red" onClick={() => {props.excluir?.(dados), props.fechar?.()}}>
+					Excluir
+				</Button>
 			</div>
 		</div>
 	)

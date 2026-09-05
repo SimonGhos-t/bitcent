@@ -19,7 +19,11 @@ export default function Resumo(props: ResumoProps) {
 		.filter((r) => r.tipo === TipoTransacao.DESPESA)
 		.reduce(totalizar, 0)
 
-	const total = receitas - despesas
+	const guardado = props.transacoes
+		.filter((r) => r.tipo === TipoTransacao.GUARDADO)
+		.reduce(totalizar, 0)
+
+	const total = receitas - despesas - guardado
 
 	return (
 		<div className="flex flex-col">
@@ -45,16 +49,16 @@ export default function Resumo(props: ResumoProps) {
 				/>
 				<ResumoItem
 					titulo="Guardado / Investido"
-					valor={total}
+					valor={guardado}
 					icone={<IconPigMoney/>}
-					iconeClassName="text-green-500"
-					valorClassName={total > 0 ? 'text-green-400' : total === 0 ? 'text-red-400' : ''}
+					iconeClassName="text-blue-500"
+					valorClassName={guardado > 0 ? 'text-green-400' : guardado === 0 ? 'text-red-400' : ''}
 				/>
 				<ResumoItem
 					titulo="Total"
 					valor={total}
 					icone={<IconArrowsDoubleNeSw />}
-					iconeClassName="text-blue-500"
+					iconeClassName="text-white"
 					valorClassName={total > 0 ? 'text-green-400' : total < 0 ? 'text-red-400' : ''}
 				/>
 			</div>

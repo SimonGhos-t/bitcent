@@ -6,6 +6,8 @@ export default interface Transacao {
     valor: number
     data: Date
     tipo: TipoTransacao
+    categoria?: string[]
+    parcelada?: boolean
 }
 
 export const transacaoVazia: Transacao = {
