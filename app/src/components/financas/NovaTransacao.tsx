@@ -1,12 +1,13 @@
 'use client'
 import 'dayjs/locale/pt-br'
-import { Button, Group, Radio, TextInput } from '@mantine/core'
+import { Button, Group, Radio, Select, TextInput } from '@mantine/core'
 import Transacao from '../../logic/core/financas/Transacao'
 import Dinheiro from '../../logic/utils/Dinheiro'
 import { DatePickerInput } from '@mantine/dates'
 import { TipoTransacao } from '../../logic/core/financas/TipoTransacao'
 import { IconClipboardText, IconFileCheck } from '@tabler/icons-react'
 import useFormulario from '../../data/hooks/useFormulario'
+import categorias from '../../data/constants/categorias'
 
 interface NovaTransacaoProps {
 	transacao: Transacao
@@ -25,7 +26,7 @@ export default function NovaTransacao(props: NovaTransacaoProps) {
 				<div className="flex justify-center gap-1 bg-zinc-900 py-2 px-7 text-zinc-400">
 					<IconClipboardText stroke={1} /> Formulário
 				</div>
-				<div className="flex flex-col gap-4 p-4 sm:p-7">
+				<div className="flex flex-col gap-5 p-4 sm:p-5">
 					<TextInput
 						label="Descrição"
 						value={dados.descricao}
@@ -45,6 +46,7 @@ export default function NovaTransacao(props: NovaTransacaoProps) {
 							alterarAtributo('data')(transformarDataFiresbase(valor))
 						}
 					/>
+					{/* <Select label='Categoria' placeholder='Selecione uma categoria' data={categorias}/> */}
 					<Radio.Group value={dados.tipo}>
 						<Group onChange={alterarAtributo('tipo')} justify='space-between'>
 							<Radio value={TipoTransacao.RECEITA} label="Receita" />

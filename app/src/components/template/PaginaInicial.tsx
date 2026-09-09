@@ -19,9 +19,9 @@ export default function PaginaInicial(props: PaginaInicialProps) {
 
 	return (
 		<Pagina>
-			<MenuLateral aberto={menuAberto} />
-			<div className="flex flex-col flex-1">
-				<Cabecalho aberto={menuAberto} aoAlternar={alternarMenu} />
+			<MenuLateral aberto={menuAberto} aoAlternar={alternarMenu} />
+			<div className={`flex flex-col w-full relative`}>
+			<Cabecalho aberto={menuAberto} aoAlternar={alternarMenu} />
 				<Conteudo>{props.children}</Conteudo>
 			</div>
 		</Pagina>

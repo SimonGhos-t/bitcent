@@ -2,7 +2,13 @@
 import Lista from '../../src/components/financas/Lista'
 import NaoEncontrado from '../../src/components/template/NaoEncontrado'
 import { Button, Modal, SegmentedControl } from '@mantine/core'
-import { IconCashBanknotePlus, IconLayoutGrid, IconList } from '@tabler/icons-react'
+import {
+	IconCashBanknotePlus,
+	IconClipboardList,
+	IconEdit,
+	IconLayoutGrid,
+	IconList,
+} from '@tabler/icons-react'
 import UseTransacao, { TipoExibicao } from '../../src/data/hooks/useTransacao'
 import CampoMesAno from '../../src/components/template/CampoMesAno'
 import Grade from '../../src/components/financas/Grade'
@@ -12,6 +18,7 @@ import { transacaoVazia } from '@/app/src/logic/core/financas/Transacao'
 import { useDisclosure } from '@mantine/hooks'
 import NovaTransacao from '../../src/components/financas/NovaTransacao'
 import EditarTransacao from '@/app/src/components/financas/EditarTransacao'
+import React from 'react'
 
 export default function Finanças() {
 	const {
@@ -66,7 +73,7 @@ export default function Finanças() {
 				onClick={() => {
 					;(selecionar(transacaoVazia), novaTransacao())
 				}}
-				className="mb-2"
+				className="mb-2 min-h-10"
 				variant="gradient"
 				gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
 				size="md"
@@ -80,7 +87,12 @@ export default function Finanças() {
 				onClose={fecharTransacao}
 				centered
 				size={'lg'}
-				title="Cadastrar nova transação"
+				title={
+					<TituloForulario
+						icone={<IconClipboardList />}
+						titulo="Cadastrar nova transação"
+					/>
+				}
 			>
 				<NovaTransacao
 					transacao={transacaoVazia}
@@ -94,7 +106,7 @@ export default function Finanças() {
 				onClose={fecharEdicao}
 				centered
 				size={'lg'}
-				title="Editar transação"
+				title={<TituloForulario icone={<IconEdit />} titulo="Editar transação" />}
 			>
 				<EditarTransacao
 					transacao={transacaoSelecionada ?? transacaoVazia}
@@ -102,7 +114,6 @@ export default function Finanças() {
 					salvar={salvar}
 					fechar={fecharEdicao}
 				/>
-				<button onClick={fecharEdicao}>Voltar</button>
 			</Modal>
 			{transacoes.length ? (
 				renderizarTransacoes()
@@ -110,5 +121,26 @@ export default function Finanças() {
 				<NaoEncontrado>Nenhuma transação encontrada</NaoEncontrado>
 			)}
 		</PaginaInicial>
+	)
+}
+
+interface TituloForularioProps {
+	icone: any
+	titulo: string
+	descricao?: string
+}
+
+function TituloForulario(props: TituloForularioProps) {
+	return (
+		<div className="flex gap-1 items-center text-zinc-300">
+			<span>
+				{React.cloneElement(props.icone, {
+					size: 30,
+					stroke: 1,
+				})}
+			</span>
+			<span className="text-lg font-semibold">{props.titulo}</span>
+			<span>{props.descricao}</span>
+		</div>
 	)
 }
