@@ -1,5 +1,3 @@
-import Conteudo from '@/app/src/components/template/Conteudo'
-import Cabecalho from '../../src/components/template/Cabecalho'
 import TituloPagina from '@/app/src/components/template/TituloPagina'
 import { IconForms } from '@tabler/icons-react'
 import usuario from '@/app/src/data/constants/usuarioFalso'

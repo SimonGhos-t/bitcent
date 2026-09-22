@@ -22,6 +22,11 @@ const categorias: Categoria[] = [
 		tipo: TipoTransacao.DESPESA,
 	},
 	{
+		nome: 'Lazer',
+		descricao: ['Cinema', 'Streaming', 'Jogos', 'Passeios', 'Festas', 'Viagens'],
+		tipo: TipoTransacao.DESPESA,
+	},
+	{
 		nome: 'Transporte',
 		descricao: ['Combustível', 'Transporte Público', 'Uber/Táxi'],
 		tipo: TipoTransacao.DESPESA,
@@ -51,11 +56,6 @@ const categorias: Categoria[] = [
 			'Suplementos',
 			'Esportes',
 		],
-		tipo: TipoTransacao.DESPESA,
-	},
-	{
-		nome: 'Lazer',
-		descricao: ['Cinema', 'Streaming', 'Jogos', 'Passeios', 'Festas', 'Viagens'],
 		tipo: TipoTransacao.DESPESA,
 	},
 	{
@@ -104,7 +104,7 @@ const categorias: Categoria[] = [
 	},
 	//Guardado
 	{
-		nome: 'Economias',
+		nome: 'Economizado',
 		descricao: ['Guardado', 'Investido', 'Poupança'],
 		tipo: TipoTransacao.GUARDADO,
 	},

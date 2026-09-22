@@ -1,7 +1,14 @@
 import ResumoItem from './ResumoItem'
 import Transacao from '../../logic/core/financas/Transacao'
 import { TipoTransacao } from '../../logic/core/financas/TipoTransacao'
-import { IconArrowsDoubleNeSw, IconCashPlus, IconCreditCard, IconPigMoney } from '@tabler/icons-react'
+import {
+	IconArrowsDoubleNeSw,
+	IconCalendarDollar,
+	IconCashPlus,
+	IconCreditCard,
+	IconPigMoney,
+} from '@tabler/icons-react'
+import TituloPagina from '../template/TituloPagina'
 
 interface ResumoProps {
 	transacoes: Transacao[]
@@ -27,13 +34,11 @@ export default function Resumo(props: ResumoProps) {
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex items-center mb-2">
-				<span className="text-zinc-400 pr-3 py-1 border-t border-zinc-800 rounded-r-lg">
-					Seu resumo mensal
-				</span>
-				<div className="border-l border-zinc-800 h-4"></div>
-				<div className="flex flex-1 h-3 border-b rounded-l-lg border-zinc-800 self-end"></div>
-			</div>
+			<TituloPagina
+				icone={<IconCalendarDollar />}
+				principal="Resumo mensal"
+				secundario="Acompanhe o que você gastou no mês"
+			/>
 			<div className={`grid grid-cols-1 lg:grid-cols-2 gap-3 ${props.className ?? ''}`}>
 				<ResumoItem
 					titulo="Receitas"
@@ -50,9 +55,11 @@ export default function Resumo(props: ResumoProps) {
 				<ResumoItem
 					titulo="Guardado / Investido"
 					valor={guardado}
-					icone={<IconPigMoney/>}
+					icone={<IconPigMoney />}
 					iconeClassName="text-blue-500"
-					valorClassName={guardado > 0 ? 'text-green-400' : guardado === 0 ? 'text-red-400' : ''}
+					valorClassName={
+						guardado > 0 ? 'text-green-400' : guardado === 0 ? 'text-red-400' : ''
+					}
 				/>
 				<ResumoItem
 					titulo="Total"

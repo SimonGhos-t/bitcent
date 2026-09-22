@@ -34,14 +34,13 @@ export default function useFormulario<T = any>(dadosIniciais?: T) {
 					return new Date(ano, mes - 1, dia)
 				}
 			}
-
 			return null
 		}
-
+	
 	return {
 		dados,
 		alterarDados: setDados,
 		alterarAtributo,
-		transformarDataFiresbase
+		transformarDataFiresbase,
 	}
 }

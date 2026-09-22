@@ -1,28 +1,32 @@
 import React from 'react'
 
 interface TituloPaginaProps {
-    principal: string
+	principal: string
 	icone?: any
 	secundario?: string
 	className?: string
 }
 export default function TituloPagina(props: TituloPaginaProps) {
 	return (
-		<div className={`flex items-center mb-4 gap-2 ${props.className ?? ''}`}>
-			{props.icone && (
+		<div className={`flex items-center my-4 ${props.className ?? ''}`}>
+			<div className="flex gap-2 text-zinc-400 pt-1 relative">
 				<div className="text-zinc-200">
 					{React.cloneElement(props.icone, {
 						stroke: 1,
 						size: props.secundario ? 50 : 24,
 					})}
 				</div>
-			)}
-			<div className="flex flex-col text-zinc-200">
-				<h1 className="text-3xl font-black">{props.principal}</h1>
-				{props.secundario && (
-					<h2 className="text-zinc-400 text-sm font-thin -mt-1">{props.secundario}</h2>
-				)}
+				<div className="flex flex-col text-zinc-200">
+					<h1 className="text-3xl font-bold pr-3">{props.principal}</h1>
+					{props.secundario && (
+						<h2 className="text-zinc-400 text-sm font-thin -mt-1 pr-3">
+							{props.secundario}
+						</h2>
+					)}
+				</div>
+				<div className="border-zinc-700 absolute top-0 right-0 w-full h-full border-t border-r rounded-tr-xl"></div>
 			</div>
+			<div className="flex flex-1 border-zinc-700 border-b relative w-full h-full"></div>
 		</div>
 	)
 }

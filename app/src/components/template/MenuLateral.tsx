@@ -1,7 +1,7 @@
 'use client'
 import Link from 'next/link'
-import { IconArrowsRightLeft, IconLogout, IconUser, IconX } from '@tabler/icons-react'
-import React, { useContext } from 'react'
+import { IconArrowsRightLeft, IconHomeDollar, IconLogout, IconReportMoney, IconUser, IconX } from '@tabler/icons-react'
+import React, { useContext, useState } from 'react'
 import AutenticacaoContext from '../../data/contexts/AutenticacaoContext'
 import Logo from './Logo'
 
@@ -12,6 +12,7 @@ interface MenuLateralProps {
 
 export default function MenuLateral(props: MenuLateralProps) {
 	const { logout } = useContext(AutenticacaoContext)
+
 	return (
 		<div
 			className={`flex flex-col h-screen border-r bg-black border-zinc-800 sm:transition-all sm:duration-300 overflow-hidden z-30 ${props.aberto ? 'w-60 sm:w-80 p-3 absolute sm:relative' : 'w-0 p-0 border-0'}`}
@@ -21,8 +22,11 @@ export default function MenuLateral(props: MenuLateralProps) {
 				<BotaoFecharMenu fecharMenu={props.aoAlternar} />
 			</div>
 			<div className="flex flex-col flex-1 pt-7 border-y border-zinc-800">
-				<Link href={'/financas'}>
-					<MenuItem icone={<IconArrowsRightLeft />} nome="Finanças" />
+				<Link href={'/inicio'}>
+					<MenuItem icone={<IconHomeDollar />} nome="Início"/>
+				</Link>
+				<Link href={'/transacoes'}>
+					<MenuItem icone={<IconReportMoney />} nome="Transações"/>
 				</Link>
 				<Link href={'/usuario'}>
 					<MenuItem icone={<IconUser />} nome="Meus Dados" />
@@ -39,13 +43,15 @@ interface MenuItemProps {
 	nome: string
 	icone: React.ReactElement<{ size?: number; stroke?: number }>
 	onClick?: () => void
+	className?: string
 }
 
 function MenuItem(props: MenuItemProps) {
+	const [ativo, setAtivo] = useState(false)
 	return (
 		<div
 			onClick={props.onClick}
-			className="flex gap-2.5 p-3 hover:bg-zinc-700 rounded-md items-center text-zinc-400 hover:text-white cursor-pointer"
+			className={`flex gap-2.5 p-3 hover:bg-zinc-700 rounded-md items-center text-zinc-400 hover:text-white cursor-pointer`}
 		>
 			{React.cloneElement(props.icone, {
 				size: 25,
@@ -56,10 +62,10 @@ function MenuItem(props: MenuItemProps) {
 	)
 }
 
-function BotaoFecharMenu(props: {fecharMenu: () => void}) {
-	return(
-		<div className='text-zinc-300 sm:hidden' onClick={props.fecharMenu}>
-			<IconX size={25}/>
+function BotaoFecharMenu(props: { fecharMenu: () => void }) {
+	return (
+		<div className="text-zinc-300 sm:hidden" onClick={props.fecharMenu}>
+			<IconX size={25} />
 		</div>
 	)
 }

@@ -2,19 +2,21 @@ import { useContext, useEffect, useState } from 'react'
 import Transacao from '../../logic/core/financas/Transacao'
 import AutenticacaoContext from '../contexts/AutenticacaoContext'
 import servicos from '../../logic/core'
+import { useRouter } from 'next/navigation'
 
 export type TipoExibicao = 'lista' | 'grade'
 
-export default function UseTransacao() {
+export default function useTransacao() {
 	const { usuario } = useContext(AutenticacaoContext)
 	const [data, setData] = useState<Date>(new Date())
 	const [tipoExibicao, setTipoExibicao] = useState<TipoExibicao>('grade')
 	const [transacoes, setTransacoes] = useState<Transacao[]>([])
 	const [transacaoSelecionada, setTransacao] = useState<Transacao | null>(null)
-
+	const router = useRouter()
+	
 	useEffect(() => {
 		buscarTransacoes()
-	}, [data])
+	}, [data, router])
 
 	async function buscarTransacoes() {
 		if (!usuario) return

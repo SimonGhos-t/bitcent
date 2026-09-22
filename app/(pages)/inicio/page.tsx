@@ -8,8 +8,9 @@ import {
 	IconEdit,
 	IconLayoutGrid,
 	IconList,
+	IconReportMoney,
 } from '@tabler/icons-react'
-import UseTransacao, { TipoExibicao } from '../../src/data/hooks/useTransacao'
+import useTransacao, { TipoExibicao } from '../../src/data/hooks/useTransacao'
 import CampoMesAno from '../../src/components/template/CampoMesAno'
 import Grade from '../../src/components/financas/Grade'
 import Resumo from '../../src/components/financas/Resumo'
@@ -18,9 +19,10 @@ import { transacaoVazia } from '@/app/src/logic/core/financas/Transacao'
 import { useDisclosure } from '@mantine/hooks'
 import NovaTransacao from '../../src/components/financas/NovaTransacao'
 import EditarTransacao from '@/app/src/components/financas/EditarTransacao'
-import React from 'react'
+import TituloPagina from '@/app/src/components/template/TituloPagina'
+import TituloFormulario from '@/app/src/components/template/TituloFormulario'
 
-export default function Finanças() {
+export default function Inicio() {
 	const {
 		data,
 		alterarData,
@@ -31,7 +33,7 @@ export default function Finanças() {
 		selecionar,
 		salvar,
 		excluir,
-	} = UseTransacao()
+	} = useTransacao()
 	const [novaTransacaoAberta, { open: novaTransacao, close: fecharTransacao }] =
 		useDisclosure(false)
 	const [editarTransacaoAberta, { open: editarTransacao, close: fecharEdicao }] =
@@ -81,14 +83,13 @@ export default function Finanças() {
 				Nova Transação
 			</Button>
 			<Resumo transacoes={transacoes} className="mb-5" />
-			{renderizarBotoes()}
 			<Modal
 				opened={novaTransacaoAberta}
 				onClose={fecharTransacao}
 				centered
 				size={'lg'}
 				title={
-					<TituloForulario
+					<TituloFormulario
 						icone={<IconClipboardList />}
 						titulo="Cadastrar nova transação"
 					/>
@@ -106,7 +107,7 @@ export default function Finanças() {
 				onClose={fecharEdicao}
 				centered
 				size={'lg'}
-				title={<TituloForulario icone={<IconEdit />} titulo="Editar transação" />}
+				title={<TituloFormulario icone={<IconEdit />} titulo="Editar transação" />}
 			>
 				<EditarTransacao
 					transacao={transacaoSelecionada ?? transacaoVazia}
@@ -115,32 +116,17 @@ export default function Finanças() {
 					fechar={fecharEdicao}
 				/>
 			</Modal>
+			<TituloPagina
+				icone={<IconReportMoney />}
+				principal="Meus Registros"
+				secundario="Todas as transações cadastradas"
+			/>
+			{renderizarBotoes()}
 			{transacoes.length ? (
 				renderizarTransacoes()
 			) : (
 				<NaoEncontrado>Nenhuma transação encontrada</NaoEncontrado>
 			)}
 		</PaginaInicial>
-	)
-}
-
-interface TituloForularioProps {
-	icone: any
-	titulo: string
-	descricao?: string
-}
-
-function TituloForulario(props: TituloForularioProps) {
-	return (
-		<div className="flex gap-1 items-center text-zinc-300">
-			<span>
-				{React.cloneElement(props.icone, {
-					size: 30,
-					stroke: 1,
-				})}
-			</span>
-			<span className="text-lg font-semibold">{props.titulo}</span>
-			<span>{props.descricao}</span>
-		</div>
 	)
 }

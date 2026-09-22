@@ -14,7 +14,7 @@ interface PaginaInicialProps {
 export default function PaginaInicial(props: PaginaInicialProps) {
 	const [menuAberto, { toggle: alternarMenu }] = useDisclosure(true)
 	if (!props.children) {
-		return redirect('/financas')
+		return redirect('/inicio')
 	}
 
 	return (

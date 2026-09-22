@@ -1,11 +1,14 @@
 'use client'
 import 'dayjs/locale/pt-br'
-import { Button, Group, Radio, TextInput } from '@mantine/core'
+import { Button, Group, Radio, Select, TextInput } from '@mantine/core'
 import Transacao from '../../logic/core/financas/Transacao'
 import Dinheiro from '../../logic/utils/Dinheiro'
-import { DatePickerInput } from '@mantine/dates'
+import { DatePickerInput, DatePickerInputProps } from '@mantine/dates'
 import { TipoTransacao } from '../../logic/core/financas/TipoTransacao'
 import useFormulario from '../../data/hooks/useFormulario'
+import { IconCalendarWeek, IconCategory, IconCategoryPlus, IconFileCheck, IconTrash } from '@tabler/icons-react'
+import dayjs from 'dayjs'
+import useCategorias from '../../data/hooks/useCategorias'
 
 interface EditarTransacaoProps {
 	transacao: Transacao
@@ -19,14 +22,43 @@ export default function EditarTransacao(props: EditarTransacaoProps) {
 	const { dados, alterarAtributo, transformarDataFiresbase } = useFormulario<Transacao>(
 		props.transacao,
 	)
+	const { categoriaDespesasPorNome, categoriasPorDescricao } = useCategorias()
+
+	const renderizarDia: DatePickerInputProps['renderDay'] = (date) => {
+			const dia = dayjs(date).date()
+			const hoje = dayjs().date()
+			return (
+				<div className={`${ dia !== hoje ? '' : 'bg-blue-500'} rounded p-1`}>{dia}</div>
+			)
+		}
 
 	return (
 		<div className="flex flex-col border bg-black border-zinc-700 rounded-xl overflow-hidden">
 			<div className="flex flex-col gap-4 p-4 sm:p-7">
-				<TextInput
+				<Radio.Group value={dados.tipo}>
+					<Group onChange={alterarAtributo('tipo')} justify="space-between">
+						<Radio value={TipoTransacao.RECEITA} label="Receita" />
+						<Radio value={TipoTransacao.DESPESA} label="Despesa" />
+						<Radio value={TipoTransacao.GUARDADO} label="Guardado" />
+					</Group>
+				</Radio.Group>
+				<Select
+					label="Categoria"
+					leftSection={<IconCategory />}
+					placeholder="Selecione uma categoria"
+					data={categoriaDespesasPorNome(dados.tipo)}
+					searchable
+					value={dados.categoria}
+					onChange={alterarAtributo('categoria')}
+				/>
+				<Select
 					label="Descrição"
+					leftSection={<IconCategoryPlus />}
+					placeholder="Selecione uma descrição"
+					data={categoriasPorDescricao(dados.categoria)}
 					value={dados.descricao}
 					onChange={alterarAtributo('descricao')}
+					disabled={dados.categoria ? false : true}
 				/>
 				<TextInput
 					label="Valor"
@@ -35,29 +67,33 @@ export default function EditarTransacao(props: EditarTransacaoProps) {
 				/>
 				<DatePickerInput
 					label="Data"
+					leftSection={<IconCalendarWeek />}
+					firstDayOfWeek={0}
 					value={transformarDataFiresbase(dados.data)}
 					locale="pt-BR"
 					valueFormat="DD/MM/YYYY"
+					renderDay={renderizarDia}
 					onChange={(valor) => alterarAtributo('data')(transformarDataFiresbase(valor))}
 				/>
-				<Radio.Group value={dados.tipo}>
-					<Group onChange={alterarAtributo('tipo')} justify='space-between'>
-						<Radio value={TipoTransacao.RECEITA} label="Receita" />
-						<Radio value={TipoTransacao.DESPESA} label="Despesa" />
-						<Radio value={TipoTransacao.GUARDADO} label="Guardado" />
-					</Group>
-				</Radio.Group>
 			</div>
 			<div className="flex px-4 py-4 sm:px-7 gap-3 bg-zinc-900">
 				<Button
-					className="bg-green-500"
 					color="green"
-					onClick={() => {props.salvar?.(dados), props.fechar?.()}}
+					leftSection={<IconFileCheck size={16} />}
+					onClick={() => {
+						;(props.salvar?.(dados), props.fechar?.())
+					}}
 				>
 					Salvar
 				</Button>
 				<div className="flex flex-1"></div>
-				<Button className="bg-red-500" color="red" onClick={() => {props.excluir?.(dados), props.fechar?.()}}>
+				<Button
+					color="red"
+					leftSection={<IconTrash size={16} />}
+					onClick={() => {
+						;(props.excluir?.(dados), props.fechar?.())
+					}}
+				>
 					Excluir
 				</Button>
 			</div>
