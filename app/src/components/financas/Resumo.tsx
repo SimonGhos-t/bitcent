@@ -1,4 +1,5 @@
 import ResumoItem from './ResumoItem'
+import ResumoMaiorDespesa from './ResumoMaiorDespesa'
 import Transacao from '../../logic/core/financas/Transacao'
 import { TipoTransacao } from '../../logic/core/financas/TipoTransacao'
 import {
@@ -7,6 +8,7 @@ import {
 	IconCashPlus,
 	IconCreditCard,
 	IconPigMoney,
+	IconTrendingUp,
 } from '@tabler/icons-react'
 import TituloPagina from '../template/TituloPagina'
 
@@ -69,6 +71,8 @@ export default function Resumo(props: ResumoProps) {
 					valorClassName={total > 0 ? 'text-green-400' : total < 0 ? 'text-red-400' : ''}
 				/>
 			</div>
+			{/* <TituloPagina principal='Maiores despesas' icone={<IconTrendingUp/>}/>
+			<ResumoMaiorDespesa/> */}
 		</div>
 	)
 }

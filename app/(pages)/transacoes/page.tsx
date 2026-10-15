@@ -9,12 +9,23 @@ import TituloFormulario from '@/app/src/components/template/TituloFormulario'
 import TituloPagina from '@/app/src/components/template/TituloPagina'
 import useTransacao, { TipoExibicao } from '@/app/src/data/hooks/useTransacao'
 import { transacaoVazia } from '@/app/src/logic/core/financas/Transacao'
-import { Modal, SegmentedControl } from '@mantine/core'
+import { Modal, Pagination, SegmentedControl } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { IconEdit, IconLayoutGrid, IconList, IconReportMoney } from '@tabler/icons-react'
+import { useState } from 'react'
 
 export default function Transacoes() {
-	const { tipoExibicao, transacoes, data, transacaoSelecionada, excluir, salvar, selecionar, alterarData, alterarTipoExibicao} = useTransacao()
+	const {
+		tipoExibicao,
+		transacoes,
+		data,
+		transacaoSelecionada,
+		excluir,
+		salvar,
+		selecionar,
+		alterarData,
+		alterarTipoExibicao,
+	} = useTransacao()
 	const [editarTransacaoAberta, { open: editarTransacao, close: fecharEdicao }] =
 		useDisclosure(false)
 
@@ -26,11 +37,15 @@ export default function Transacoes() {
 				abrirEditar={editarTransacao}
 			/>
 		) : (
-			<Lista transacoes={transacoes} selecionarTransacao={selecionar} />
+			<Lista
+				transacoes={transacoes}
+				selecionarTransacao={selecionar}
+				abrirEditar={editarTransacao}
+			/>
 		)
 	}
 
-    function renderizarBotoes() {
+	function renderizarBotoes() {
 		return (
 			<div className="flex justify-between items-center">
 				<CampoMesAno data={data} dataMudou={alterarData} />
@@ -69,11 +84,14 @@ export default function Transacoes() {
 				/>
 			</Modal>
 			{renderizarBotoes()}
-			{transacoes.length ? (
-				renderizarTransacoes()
-			) : (
-				<NaoEncontrado>Nenhuma transação encontrada</NaoEncontrado>
-			)}
+			<div className='flex flex-col h-full'>
+				{transacoes.length ? (
+					renderizarTransacoes()
+				) : (
+					<NaoEncontrado>Nenhuma transação encontrada</NaoEncontrado>
+				)}
+				{/* <Pagination total={transacoes.length} className='self-center'/> */}
+			</div>
 		</PaginaInicial>
 	)
 }

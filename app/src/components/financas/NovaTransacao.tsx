@@ -1,6 +1,6 @@
 'use client'
 import 'dayjs/locale/pt-br'
-import { Button, Group, Indicator, Radio, Select, TextInput } from '@mantine/core'
+import { Button, Group, Radio, Select, TextInput } from '@mantine/core'
 import Transacao from '../../logic/core/financas/Transacao'
 import Dinheiro from '../../logic/utils/Dinheiro'
 import { DatePickerInput, DatePickerInputProps } from '@mantine/dates'
@@ -9,6 +9,7 @@ import { IconCalendarWeek, IconCategory, IconCategoryPlus, IconFileCheck } from 
 import useFormulario from '../../data/hooks/useFormulario'
 import dayjs from 'dayjs'
 import useCategorias from '../../data/hooks/useCategorias'
+import Image from 'next/image'
 
 interface NovaTransacaoProps {
 	transacao: Transacao
@@ -22,7 +23,7 @@ export default function NovaTransacao(props: NovaTransacaoProps) {
 	const { dados, alterarAtributo, transformarDataFiresbase } = useFormulario<Transacao>(
 		props.transacao,
 	)
-	const {categoriaDespesasPorNome, categoriasPorDescricao} = useCategorias()
+	const {categoriasPorNome, categoriasPorDescricao, iconeCategoria} = useCategorias()
 
 	const renderizarDia: DatePickerInputProps['renderDay'] = (date) => {
 		const dia = dayjs(date).date()
@@ -31,7 +32,6 @@ export default function NovaTransacao(props: NovaTransacaoProps) {
 			<div className={`${ dia !== hoje ? '' : 'bg-blue-500'} rounded p-1`}>{dia}</div>
 		)
 	}
-
 
 	return (
 		<div className="flex flex-col border bg-black border-zinc-700 rounded-xl overflow-hidden">
@@ -43,11 +43,12 @@ export default function NovaTransacao(props: NovaTransacaoProps) {
 						<Radio value={TipoTransacao.GUARDADO} label="Guardado" />
 					</Group>
 				</Radio.Group>
+				<Image src={iconeCategoria('Moradia')} width={35} height={35} alt='Icone'/>
 				<Select
 					label="Categoria"
 					leftSection={<IconCategory />}
 					placeholder="Selecione uma categoria"
-					data={categoriaDespesasPorNome(dados.tipo)}
+					data={categoriasPorNome(dados.tipo)}
 					searchable
 					value={dados.categoria}
 					onChange={alterarAtributo('categoria')}

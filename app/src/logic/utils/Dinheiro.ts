@@ -13,4 +13,8 @@ export default class Dinheiro {
         const i = numeros.length - 2
         return Number(`${numeros.substring(0, i)}.${numeros.substring(i)}`)
     }
+
+    static decimal(valor: number) {
+        return valor.toFixed(2).replace('.' , ',')
+    }
 }

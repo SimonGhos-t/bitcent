@@ -1,9 +1,17 @@
 'use client'
 import Link from 'next/link'
-import { IconArrowsRightLeft, IconHomeDollar, IconLogout, IconReportMoney, IconUser, IconX } from '@tabler/icons-react'
+import {
+	IconArrowsRightLeft,
+	IconHomeDollar,
+	IconLogout,
+	IconReportMoney,
+	IconUser,
+	IconX,
+} from '@tabler/icons-react'
 import React, { useContext, useState } from 'react'
 import AutenticacaoContext from '../../data/contexts/AutenticacaoContext'
 import Logo from './Logo'
+import { usePathname } from 'next/navigation'
 
 interface MenuLateralProps {
 	aberto: boolean
@@ -12,6 +20,7 @@ interface MenuLateralProps {
 
 export default function MenuLateral(props: MenuLateralProps) {
 	const { logout } = useContext(AutenticacaoContext)
+	const caminho = usePathname()
 
 	return (
 		<div
@@ -23,13 +32,17 @@ export default function MenuLateral(props: MenuLateralProps) {
 			</div>
 			<div className="flex flex-col flex-1 pt-7 border-y border-zinc-800">
 				<Link href={'/inicio'}>
-					<MenuItem icone={<IconHomeDollar />} nome="Início"/>
+					<MenuItem
+						icone={<IconHomeDollar />}
+						nome="Início"
+						selecionado={caminho.startsWith('/inicio')}
+					/>
 				</Link>
 				<Link href={'/transacoes'}>
-					<MenuItem icone={<IconReportMoney />} nome="Transações"/>
+					<MenuItem icone={<IconReportMoney />} nome="Transações" selecionado={caminho.startsWith('/transacoes')}/>
 				</Link>
 				<Link href={'/usuario'}>
-					<MenuItem icone={<IconUser />} nome="Meus Dados" />
+					<MenuItem icone={<IconUser />} nome="Meus Dados" selecionado={caminho.startsWith('/usuario')}/>
 				</Link>
 			</div>
 			<div className="flex flex-col py-7">
@@ -42,6 +55,7 @@ export default function MenuLateral(props: MenuLateralProps) {
 interface MenuItemProps {
 	nome: string
 	icone: React.ReactElement<{ size?: number; stroke?: number }>
+	selecionado?: boolean
 	onClick?: () => void
 	className?: string
 }
@@ -51,7 +65,7 @@ function MenuItem(props: MenuItemProps) {
 	return (
 		<div
 			onClick={props.onClick}
-			className={`flex gap-2.5 p-3 hover:bg-zinc-700 rounded-md items-center text-zinc-400 hover:text-white cursor-pointer`}
+			className={`flex gap-2.5 p-3 rounded-md items-center  cursor-pointer ${props.selecionado ? 'bg-linear-to-r bg-blue-500 to-cyan-500 text-white' : 'hover:bg-zinc-700 hover:text-white text-zinc-400'}`}
 		>
 			{React.cloneElement(props.icone, {
 				size: 25,

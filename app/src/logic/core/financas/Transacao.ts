@@ -1,10 +1,10 @@
-import Categoria from './Categoria'
 import { TipoTransacao } from './TipoTransacao'
 
 export default interface Transacao {
 	id?: string
 	categoria: string
 	descricao: string
+	icone?: string
 	valor: number
 	data: Date
 	tipo: TipoTransacao

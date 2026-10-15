@@ -22,7 +22,7 @@ export default function EditarTransacao(props: EditarTransacaoProps) {
 	const { dados, alterarAtributo, transformarDataFiresbase } = useFormulario<Transacao>(
 		props.transacao,
 	)
-	const { categoriaDespesasPorNome, categoriasPorDescricao } = useCategorias()
+	const {categoriasPorNome, categoriasPorDescricao } = useCategorias()
 
 	const renderizarDia: DatePickerInputProps['renderDay'] = (date) => {
 			const dia = dayjs(date).date()
@@ -46,7 +46,7 @@ export default function EditarTransacao(props: EditarTransacaoProps) {
 					label="Categoria"
 					leftSection={<IconCategory />}
 					placeholder="Selecione uma categoria"
-					data={categoriaDespesasPorNome(dados.tipo)}
+					data={categoriasPorNome(dados.tipo)}
 					searchable
 					value={dados.categoria}
 					onChange={alterarAtributo('categoria')}

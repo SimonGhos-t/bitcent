@@ -12,9 +12,10 @@ export interface ResumoItemProps {
 export default function ResumoItem(props: ResumoItemProps) {
 	return (
 		<div
-			className="relative flex flex-col bg-black pt-4 pb-3 px-5 rounded-lg
+			className="relative flex flex-col justify-between bg-black py-3 px-5 rounded-lg
             border border-zinc-800 text-white shadow shadow-blue-950"
 		>
+			{' '}
 			<div className="text-sm text-zinc-500">{props.titulo}</div>
 			<div className="flex justify-between items-center">
 				<span className={`text-3xl font-black ${props.valorClassName ?? ''}`}>

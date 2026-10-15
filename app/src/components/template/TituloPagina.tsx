@@ -8,16 +8,16 @@ interface TituloPaginaProps {
 }
 export default function TituloPagina(props: TituloPaginaProps) {
 	return (
-		<div className={`flex items-center my-4 ${props.className ?? ''}`}>
+		<div className={`flex items-center mb-3 ${props.className ?? ''}`}>
 			<div className="flex gap-2 text-zinc-400 pt-1 relative">
 				<div className="text-zinc-200">
 					{React.cloneElement(props.icone, {
 						stroke: 1,
-						size: props.secundario ? 50 : 24,
+						size: props.secundario ? 45 : 35,
 					})}
 				</div>
 				<div className="flex flex-col text-zinc-200">
-					<h1 className="text-3xl font-bold pr-3">{props.principal}</h1>
+					<h1 className="text-2xl font-bold pr-3">{props.principal}</h1>
 					{props.secundario && (
 						<h2 className="text-zinc-400 text-sm font-thin -mt-1 pr-3">
 							{props.secundario}

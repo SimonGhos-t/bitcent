@@ -1,7 +1,7 @@
 import categorias from '../constants/categorias'
 
 export default function useCategorias() {
-	function categoriaDespesasPorNome(tipo: string) {
+	function categoriasPorNome(tipo: string) {
 		return categorias
 			.filter((categoria) => categoria.tipo === tipo)
 			.map((categoria) => categoria.nome)
@@ -12,5 +12,10 @@ export default function useCategorias() {
 		return categoria?.descricao
 	}
 
-	return { categoriaDespesasPorNome, categoriasPorDescricao }
+	function iconeCategoria (nome: string) {
+		const categoria = categorias.find((categoria) => categoria.nome === nome)
+		return categoria?.icone 
+	}
+
+	return { categoriasPorNome, categoriasPorDescricao, iconeCategoria }
 }

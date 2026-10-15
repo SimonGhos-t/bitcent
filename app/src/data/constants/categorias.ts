@@ -15,36 +15,43 @@ const categorias: Categoria[] = [
 			'Internet',
 		],
 		tipo: TipoTransacao.DESPESA,
+		icone: '/icons/home.png',
 	},
 	{
 		nome: 'Alimentação',
 		descricao: ['Mercado', 'Lanche', 'Delivery'],
 		tipo: TipoTransacao.DESPESA,
+		icone: '/icons/tools-kitchen-2.png',
 	},
 	{
 		nome: 'Lazer',
-		descricao: ['Cinema', 'Streaming', 'Jogos', 'Passeios', 'Festas', 'Viagens'],
+		descricao: ['Cinema', 'Jogos', 'Passeios', 'Festas', 'Viagens'],
 		tipo: TipoTransacao.DESPESA,
+		icone: '/icons/ticket.png',
 	},
 	{
 		nome: 'Transporte',
 		descricao: ['Combustível', 'Transporte Público', 'Uber/Táxi'],
 		tipo: TipoTransacao.DESPESA,
+		icone: '/icons/car.png',
 	},
 	{
 		nome: 'Compras',
 		descricao: ['Roupas', 'Sapatos', 'Acessórios', 'Cosméticos', 'Eletrônicos'],
 		tipo: TipoTransacao.DESPESA,
+		icone: '/icons/shopping-bag.png',
 	},
 	{
 		nome: 'Dívidas',
-		descricao: ['Financiamento', 'Empréstimo Pessoal', 'Cheque Especial'],
+		descricao: ['Cartão de crédito', 'Financiamento', 'Empréstimo Pessoal', 'Cheque Especial'],
 		tipo: TipoTransacao.DESPESA,
+		icone: '/icons/coin.png',
 	},
 	{
 		nome: 'Educação',
 		descricao: ['Faculdade', 'Curso', 'Escola', 'Idiomas'],
 		tipo: TipoTransacao.DESPESA,
+		icone: '/icons/school.png',
 	},
 	{
 		nome: 'Saúde',
@@ -57,56 +64,65 @@ const categorias: Categoria[] = [
 			'Esportes',
 		],
 		tipo: TipoTransacao.DESPESA,
+		icone: '/icons/heartbeat.png',
 	},
 	{
 		nome: 'Pessoal',
-		descricao: [
-			'Salão/Barbearia',
-			'Presentes',
-			'Pet',
-		],
+		descricao: ['Salão/Barbearia', 'Presentes', 'Pet'],
 		tipo: TipoTransacao.DESPESA,
+		icone: '/icons/user-dollar.png',
 	},
 	{
 		nome: 'Assinaturas',
 		descricao: [
-			'Celular/Plano de Dados',
+			'Streaming',
+			'Plano de Celular',
 			'Softwares',
-			'Nuvem (iCloud/Google)',
-			'Seguros (Vida/Carro/Casa)',
+			'Nuvem',
+			'Seguros',
 		],
 		tipo: TipoTransacao.DESPESA,
+		icone: '/icons/repeat.png',
 	},
 	{
 		nome: 'Impostos',
 		descricao: ['IRPF', 'Taxa Bancária', 'Cartório', 'Licenciamento', 'IPVA', 'IPTU'],
 		tipo: TipoTransacao.DESPESA,
+		icone: '/icons/receipt-tax.png',
 	},
-    {
+	{
 		nome: 'Outros',
-		descricao: [
-			'Diversos',
-			'Imprevistos',
-			'Outros',
-		],
+		descricao: ['Diversos', 'Imprevistos'],
 		tipo: TipoTransacao.DESPESA,
+		icone: '/icons/dots.png',
 	},
-    //Receitas
+	//Receitas
 	{
 		nome: 'Salário',
-		descricao: ['Salário Mensal', 'Bônus', 'Comissão', 'Férias', 'Décimo Terceiro'],
+		descricao: [
+			'Salário Mensal',
+			'Vale Alimentação',
+			'Vale Refeição',
+			'Comissão',
+			'Bônus',
+			'Férias',
+			'Décimo Terceiro',
+		],
 		tipo: TipoTransacao.RECEITA,
+		icone: '/icons/cash-banknote-plus.png',
 	},
 	{
 		nome: 'Investimentos',
 		descricao: ['Rendimentos', 'Dividendos', 'Aluguel de Imóvel', 'Venda de Ativos'],
 		tipo: TipoTransacao.RECEITA,
+		icone: '/icons/trending-up.png',
 	},
 	//Guardado
 	{
 		nome: 'Economizado',
 		descricao: ['Guardado', 'Investido', 'Poupança'],
 		tipo: TipoTransacao.GUARDADO,
+		icone: '/icons/pig-money.png',
 	},
 ]
 
