@@ -43,7 +43,6 @@ export default function NovaTransacao(props: NovaTransacaoProps) {
 						<Radio value={TipoTransacao.GUARDADO} label="Guardado" />
 					</Group>
 				</Radio.Group>
-				<Image src={iconeCategoria('Moradia')} width={35} height={35} alt='Icone'/>
 				<Select
 					label="Categoria"
 					leftSection={<IconCategory />}
