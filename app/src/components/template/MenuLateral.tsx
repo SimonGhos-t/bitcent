@@ -2,7 +2,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useContext } from 'react'
-import { Avatar, Box, NavLink, Stack, Text, UnstyledButton } from '@mantine/core'
+import { Avatar, Box, NavLink, Stack, Text } from '@mantine/core'
 import { IconLogout } from '@tabler/icons-react'
 import AutenticacaoContext from '../../data/contexts/AutenticacaoContext'
 import Logo from './Logo'
@@ -55,16 +55,15 @@ export default function MenuLateral() {
 						</Text>
 					</div>
 				</div>
-				<UnstyledButton
+				{/* Mesmo componente dos itens do menu, para ficar alinhado com eles */}
+				<NavLink
+					component="button"
 					onClick={logout}
-					className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-(--mantine-color-dark-6)"
-					c="dark.1"
-				>
-					<IconLogout size={20} stroke={1.8} />
-					<Text fw={600} size="sm">
-						Sair
-					</Text>
-				</UnstyledButton>
+					label="Sair"
+					leftSection={<IconLogout size={20} stroke={1.8} />}
+					style={{ borderRadius: 'var(--mantine-radius-md)' }}
+					fw={600}
+				/>
 			</Stack>
 		</Box>
 	)
