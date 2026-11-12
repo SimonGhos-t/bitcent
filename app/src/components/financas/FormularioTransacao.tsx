@@ -1,6 +1,7 @@
 'use client'
 import 'dayjs/locale/pt-br'
 import {
+	ActionIcon,
 	Button,
 	Checkbox,
 	Group,
@@ -229,6 +230,7 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 
 			<Group
 				justify="space-between"
+				gap="xs"
 				mt="lg"
 				pt="md"
 				style={{ borderTop: '1px solid var(--mantine-color-dark-5)' }}
@@ -240,19 +242,39 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 						onChange={(e) => setCadastrarOutra(e.currentTarget.checked)}
 					/>
 				) : (
-					<Button
-						variant="subtle"
-						color="red"
-						c="red.4"
-						leftSection={<IconTrash size={16} />}
-						onClick={() => setConfirmarExclusao(true)}
-					>
-						Excluir
-					</Button>
+					<>
+						<Button
+							visibleFrom="sm"
+							variant="subtle"
+							color="red"
+							c="red.4"
+							leftSection={<IconTrash size={16} />}
+							onClick={() => setConfirmarExclusao(true)}
+						>
+							Excluir
+						</Button>
+						{/* No celular só o ícone, para o rodapé caber em uma linha */}
+						<ActionIcon
+							hiddenFrom="sm"
+							variant="subtle"
+							color="red"
+							c="red.4"
+							size={36}
+							aria-label="Excluir transação"
+							onClick={() => setConfirmarExclusao(true)}
+						>
+							<IconTrash size={20} />
+						</ActionIcon>
+					</>
 				)}
 				{/* ml="auto": quando quebra a linha no celular, os botões continuam à direita */}
 				<Group gap="xs" ml="auto">
-					<Button variant="subtle" color="gray" onClick={props.fechar}>
+					<Button
+						variant="subtle"
+						color="gray"
+						px={{ base: 'xs', sm: 'md' }}
+						onClick={props.fechar}
+					>
 						Cancelar
 					</Button>
 					<Button

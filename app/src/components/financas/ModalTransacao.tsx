@@ -3,6 +3,7 @@ import { Modal, Stack, Text, Title } from '@mantine/core'
 import Transacao, { criarTransacaoVazia } from '../../logic/core/financas/Transacao'
 import Data from '../../logic/utils/Data'
 import FormularioTransacao from './FormularioTransacao'
+import useCelular from '../../data/hooks/useCelular'
 
 interface ModalTransacaoProps {
 	aberto: boolean
@@ -15,6 +16,7 @@ interface ModalTransacaoProps {
 
 export default function ModalTransacao(props: ModalTransacaoProps) {
 	const editando = !!props.transacao?.id
+	const celular = useCelular()
 
 	return (
 		<Modal
@@ -22,6 +24,9 @@ export default function ModalTransacao(props: ModalTransacaoProps) {
 			onClose={props.fechar}
 			centered
 			size="lg"
+			// No celular o modal usa quase toda a largura, para o rodapé caber em uma linha
+			xOffset={celular ? 8 : '5vw'}
+			padding={celular ? 'sm' : 'md'}
 			title={
 				<Stack gap={0}>
 					<Title order={3} size="h4">
