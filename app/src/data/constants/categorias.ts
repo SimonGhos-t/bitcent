@@ -249,6 +249,7 @@ const categorias: Categoria[] = [
 			'Prêmios',
 			'Empréstimo Recebido',
 			'Devolução de Empréstimo',
+			'PIX',
 		],
 		tipo: TipoTransacao.RECEITA,
 	},
