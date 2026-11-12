@@ -73,8 +73,11 @@ export default function Transacoes() {
 					value={busca}
 					onChange={(e) => setBusca(e.currentTarget.value)}
 				/>
+				{/* No celular cada linha de filtros ocupa a largura toda, como a busca */}
 				<SegmentedControl
 					aria-label="Tipo"
+					fullWidth
+					w={{ base: '100%', sm: 'auto' }}
 					value={tipo}
 					onChange={(valor) => setTipo(valor as typeof tipo)}
 					data={[
@@ -84,31 +87,34 @@ export default function Transacoes() {
 						{ label: 'Guardado', value: TipoTransacao.GUARDADO },
 					]}
 				/>
-				<Select
-					aria-label="Categoria"
-					placeholder="Todas as categorias"
-					clearable
-					searchable
-					w={210}
-					data={categorias.map((c) => c.nome)}
-					value={categoria}
-					onChange={setCategoria}
-				/>
-				<SegmentedControl
-					aria-label="Modo de exibição"
-					value={tipoExibicao}
-					onChange={(valor) => alterarTipoExibicao(valor as TipoExibicao)}
-					data={[
-						{
-							value: 'lista',
-							label: <IconList size={18} aria-label="Lista" />,
-						},
-						{
-							value: 'grade',
-							label: <IconLayoutGrid size={18} aria-label="Grade" />,
-						},
-					]}
-				/>
+				<Group gap="sm" wrap="nowrap" w={{ base: '100%', sm: 'auto' }}>
+					<Select
+						aria-label="Categoria"
+						placeholder="Todas as categorias"
+						clearable
+						searchable
+						className="flex-1 sm:flex-none"
+						w={{ sm: 210 }}
+						data={categorias.map((c) => c.nome)}
+						value={categoria}
+						onChange={setCategoria}
+					/>
+					<SegmentedControl
+						aria-label="Modo de exibição"
+						value={tipoExibicao}
+						onChange={(valor) => alterarTipoExibicao(valor as TipoExibicao)}
+						data={[
+							{
+								value: 'lista',
+								label: <IconList size={18} aria-label="Lista" />,
+							},
+							{
+								value: 'grade',
+								label: <IconLayoutGrid size={18} aria-label="Grade" />,
+							},
+						]}
+					/>
+				</Group>
 			</Group>
 
 			<TotaisTransacoes totais={totais} />
