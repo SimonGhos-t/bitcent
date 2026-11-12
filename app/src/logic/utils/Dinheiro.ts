@@ -1,20 +1,22 @@
 export default class Dinheiro {
-    private static _lingua = 'pt-BR'
-    private static _moeda = 'BRL'
+	private static _lingua = 'pt-BR'
+	private static _moeda = 'BRL'
 
-    static formatar(num: number): string {
-        return (num ?? 0).toLocaleString(Dinheiro._lingua, {
-            style: 'currency', currency: Dinheiro._moeda
-        })  
-    }
-    
-    static desformatar(valor: string): number {
-        const numeros = valor.replace(/[^0-9]+/g, '')
-        const i = numeros.length - 2
-        return Number(`${numeros.substring(0, i)}.${numeros.substring(i)}`)
-    }
+	static formatar(num: number): string {
+		return (num ?? 0).toLocaleString(Dinheiro._lingua, {
+			style: 'currency',
+			currency: Dinheiro._moeda,
+		})
+	}
 
-    static decimal(valor: number) {
-        return valor.toFixed(2).replace('.' , ',')
-    }
+	static desformatar(valor: string): number {
+		// Máscara de centavos: os dígitos digitados são lidos da direita para a esquerda
+		const numeros = (valor ?? '').replace(/[^0-9]+/g, '')
+		if (!numeros) return 0
+		return Number(numeros) / 100
+	}
+
+	static decimal(valor: number) {
+		return valor.toFixed(2).replace('.', ',')
+	}
 }

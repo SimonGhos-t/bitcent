@@ -8,7 +8,7 @@ import PaginaInicial from '@/app/src/components/template/PaginaInicial'
 import TituloFormulario from '@/app/src/components/template/TituloFormulario'
 import TituloPagina from '@/app/src/components/template/TituloPagina'
 import useTransacao, { TipoExibicao } from '@/app/src/data/hooks/useTransacao'
-import { transacaoVazia } from '@/app/src/logic/core/financas/Transacao'
+import { criarTransacaoVazia } from '@/app/src/logic/core/financas/Transacao'
 import { Modal, Pagination, SegmentedControl } from '@mantine/core'
 import { useDisclosure } from '@mantine/hooks'
 import { IconEdit, IconLayoutGrid, IconList, IconReportMoney } from '@tabler/icons-react'
@@ -77,14 +77,14 @@ export default function Transacoes() {
 				title={<TituloFormulario icone={<IconEdit />} titulo="Editar transação" />}
 			>
 				<EditarTransacao
-					transacao={transacaoSelecionada ?? transacaoVazia}
+					transacao={transacaoSelecionada ?? criarTransacaoVazia()}
 					excluir={excluir}
 					salvar={salvar}
 					fechar={fecharEdicao}
 				/>
 			</Modal>
 			{renderizarBotoes()}
-			<div className='flex flex-col h-full'>
+			<div className="flex flex-col h-full">
 				{transacoes.length ? (
 					renderizarTransacoes()
 				) : (

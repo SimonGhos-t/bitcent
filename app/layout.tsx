@@ -8,10 +8,11 @@ import { AutenticacaoProvider } from './src/data/contexts/AutenticacaoContext'
 
 const fontNunito = Nunito({
 	subsets: ['latin'],
+	variable: '--font-nunito',
 })
 
 export const metadata: Metadata = {
-	title: 'BitCenter',
+	title: 'BitCent',
 	description: 'App de finanças',
 }
 
@@ -21,7 +22,10 @@ export default function RootLayout({
 	children: React.ReactNode
 }>) {
 	return (
-		<html lang="pt-BR" className={`${fontNunito} h-full antialiased`}>
+		<html
+			lang="pt-BR"
+			className={`${fontNunito.variable} ${fontNunito.className} h-full antialiased`}
+		>
 			<body className="min-h-full flex flex-col">
 				<MantineProvider forceColorScheme="dark">
 					<AutenticacaoProvider>{children}</AutenticacaoProvider>

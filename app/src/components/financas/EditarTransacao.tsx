@@ -1,42 +1,56 @@
 'use client'
 import 'dayjs/locale/pt-br'
 import { Button, Group, Radio, Select, TextInput } from '@mantine/core'
-import Transacao from '../../logic/core/financas/Transacao'
+import Transacao, { transacaoValida } from '../../logic/core/financas/Transacao'
 import Dinheiro from '../../logic/utils/Dinheiro'
 import { DatePickerInput, DatePickerInputProps } from '@mantine/dates'
 import { TipoTransacao } from '../../logic/core/financas/TipoTransacao'
 import useFormulario from '../../data/hooks/useFormulario'
-import { IconCalendarWeek, IconCategory, IconCategoryPlus, IconFileCheck, IconTrash } from '@tabler/icons-react'
+import {
+	IconCalendarWeek,
+	IconCategory,
+	IconCategoryPlus,
+	IconFileCheck,
+	IconTrash,
+} from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import useCategorias from '../../data/hooks/useCategorias'
 
 interface EditarTransacaoProps {
 	transacao: Transacao
-    fechar?: () => void
+	fechar?: () => void
 	salvar?: (transacao: Transacao) => void
 	excluir?: (transacao: Transacao) => void
 	cancelar?: () => void
 }
 
 export default function EditarTransacao(props: EditarTransacaoProps) {
-	const { dados, alterarAtributo, transformarDataFiresbase } = useFormulario<Transacao>(
-		props.transacao,
-	)
-	const {categoriasPorNome, categoriasPorDescricao } = useCategorias()
+	const { dados, alterarDados, alterarAtributo, transformarDataFiresbase } =
+		useFormulario<Transacao>(props.transacao)
+	const { categoriasPorNome, categoriasPorDescricao } = useCategorias()
 
 	const renderizarDia: DatePickerInputProps['renderDay'] = (date) => {
-			const dia = dayjs(date).date()
-			const hoje = dayjs().date()
-			return (
-				<div className={`${ dia !== hoje ? '' : 'bg-blue-500'} rounded p-1`}>{dia}</div>
-			)
-		}
+		const dia = dayjs(date).date()
+		const hoje = dayjs().date()
+		return <div className={`${dia !== hoje ? '' : 'bg-blue-500'} rounded p-1`}>{dia}</div>
+	}
 
 	return (
 		<div className="flex flex-col border bg-black border-zinc-700 rounded-xl overflow-hidden">
 			<div className="flex flex-col gap-4 p-4 sm:p-7">
-				<Radio.Group value={dados.tipo}>
-					<Group onChange={alterarAtributo('tipo')} justify="space-between">
+				<Radio.Group
+					value={dados.tipo}
+					onChange={(tipo) =>
+						// Categoria e descrição dependem do tipo: limpa ao trocar
+						alterarDados({
+							...dados,
+							tipo: tipo as TipoTransacao,
+							categoria: '',
+							descricao: '',
+						})
+					}
+				>
+					<Group justify="space-between">
 						<Radio value={TipoTransacao.RECEITA} label="Receita" />
 						<Radio value={TipoTransacao.DESPESA} label="Despesa" />
 						<Radio value={TipoTransacao.GUARDADO} label="Guardado" />
@@ -49,7 +63,9 @@ export default function EditarTransacao(props: EditarTransacaoProps) {
 					data={categoriasPorNome(dados.tipo)}
 					searchable
 					value={dados.categoria}
-					onChange={alterarAtributo('categoria')}
+					onChange={(categoria) =>
+						alterarDados({ ...dados, categoria: categoria ?? '', descricao: '' })
+					}
 				/>
 				<Select
 					label="Descrição"
@@ -80,6 +96,7 @@ export default function EditarTransacao(props: EditarTransacaoProps) {
 				<Button
 					color="green"
 					leftSection={<IconFileCheck size={16} />}
+					disabled={!transacaoValida(dados)}
 					onClick={() => {
 						;(props.salvar?.(dados), props.fechar?.())
 					}}

@@ -5,7 +5,7 @@ import useTransacao from '../../src/data/hooks/useTransacao'
 import CampoMesAno from '../../src/components/template/CampoMesAno'
 import Resumo from '../../src/components/financas/Resumo'
 import PaginaInicial from '@/app/src/components/template/PaginaInicial'
-import { transacaoVazia } from '@/app/src/logic/core/financas/Transacao'
+import { criarTransacaoVazia } from '@/app/src/logic/core/financas/Transacao'
 import { useDisclosure } from '@mantine/hooks'
 import NovaTransacao from '../../src/components/financas/NovaTransacao'
 import EditarTransacao from '@/app/src/components/financas/EditarTransacao'
@@ -22,11 +22,11 @@ export default function Inicio() {
 	return (
 		<PaginaInicial>
 			<Resumo transacoes={transacoes} className="mb-5" />
-			<div className='flex flex-1 justify-between'>
+			<div className="flex flex-1 justify-between">
 				<Button
 					leftSection={<IconCashBanknotePlus />}
 					onClick={() => {
-						;(selecionar(transacaoVazia), novaTransacao())
+						;(selecionar(criarTransacaoVazia()), novaTransacao())
 					}}
 					className="mb-2 min-h-10"
 					variant="gradient"
@@ -50,7 +50,7 @@ export default function Inicio() {
 				}
 			>
 				<NovaTransacao
-					transacao={transacaoVazia}
+					transacao={criarTransacaoVazia()}
 					salvar={salvar}
 					excluir={excluir}
 					fechar={fecharTransacao}
@@ -64,7 +64,7 @@ export default function Inicio() {
 				title={<TituloFormulario icone={<IconEdit />} titulo="Editar transação" />}
 			>
 				<EditarTransacao
-					transacao={transacaoSelecionada ?? transacaoVazia}
+					transacao={transacaoSelecionada ?? criarTransacaoVazia()}
 					excluir={excluir}
 					salvar={salvar}
 					fechar={fecharEdicao}

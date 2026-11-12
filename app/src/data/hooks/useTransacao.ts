@@ -13,7 +13,7 @@ export default function useTransacao() {
 	const [transacoes, setTransacoes] = useState<Transacao[]>([])
 	const [transacaoSelecionada, setTransacao] = useState<Transacao | null>(null)
 	const router = useRouter()
-	
+
 	useEffect(() => {
 		buscarTransacoes()
 	}, [data, router])
@@ -26,7 +26,7 @@ export default function useTransacao() {
 
 	async function salvar(transacao: Transacao) {
 		if (!usuario) return
-		servicos.transacao.salvar(transacao, usuario)
+		await servicos.transacao.salvar(transacao, usuario)
 		setTransacao(null)
 		await buscarTransacoes()
 	}
@@ -42,11 +42,11 @@ export default function useTransacao() {
 		data,
 		transacoes,
 		transacaoSelecionada,
-        tipoExibicao,
+		tipoExibicao,
 		salvar,
 		excluir,
 		selecionar: setTransacao,
 		alterarData: setData,
-        alterarTipoExibicao: setTipoExibicao
+		alterarTipoExibicao: setTipoExibicao,
 	}
 }
