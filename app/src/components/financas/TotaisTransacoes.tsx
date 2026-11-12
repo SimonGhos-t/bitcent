@@ -15,20 +15,22 @@ interface ItemProps {
 	cor: string
 	valor: number
 	sinal: '+' | '−' | ''
+	// Some no celular (o saldo já aparece no Início)
+	soComputador?: boolean
 }
 
-// No computador: ícone + nome + valor. No celular: só o ícone, com o valor (sem "R$")
-// logo abaixo, para os quatro caberem na mesma linha
+// No computador: ícone + nome + valor. No celular: ícone + valor (sem "R$"), sem o nome,
+// para caberem todos na mesma linha
 function Item(props: ItemProps) {
 	return (
 		<div
-			className="min-w-0 flex flex-col sm:flex-row items-center gap-1 sm:gap-1.5"
+			className={`min-w-0 items-center justify-center sm:justify-start gap-1.5 ${props.soComputador ? 'hidden sm:flex' : 'flex'}`}
 			title={props.nome}
 		>
 			<ThemeIcon variant="light" color={props.cor} size={24} radius="md" aria-hidden>
 				<props.icone size={15} stroke={2} />
 			</ThemeIcon>
-			<Text fz={{ base: 'xs', sm: 'md' }} style={{ whiteSpace: 'nowrap' }}>
+			<Text fz={{ base: 'sm', sm: 'md' }} style={{ whiteSpace: 'nowrap' }}>
 				<span className="sr-only sm:not-sr-only">{props.nome} </span>
 				<Text span fw={700} c={`${props.cor}.${props.cor === 'blue' ? 3 : 4}`} inherit>
 					{props.sinal}
@@ -72,6 +74,7 @@ export default function TotaisTransacoes(props: { totais: ResumoMensal }) {
 				)}
 				<Item
 					nome="Saldo"
+					soComputador
 					icone={IconScale}
 					cor={saldoNegativo ? 'red' : 'green'}
 					sinal={saldoNegativo ? '−' : '+'}
