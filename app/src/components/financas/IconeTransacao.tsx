@@ -16,6 +16,11 @@ import {
 	IconToolsKitchen2,
 	IconTrendingUp,
 	IconUserDollar,
+	IconDeviceDesktop,
+	IconUsers,
+	IconBriefcase,
+	IconCoins,
+	IconGift,
 } from '@tabler/icons-react'
 import { TipoTransacao } from '../../logic/core/financas/TipoTransacao'
 
@@ -35,6 +40,11 @@ const iconesPorCategoria: Record<string, Icon> = {
 	Salário: IconCashBanknotePlus,
 	Investimentos: IconTrendingUp,
 	Economizado: IconPigMoney,
+	Tecnologia: IconDeviceDesktop,
+	Família: IconUsers,
+	Trabalho: IconBriefcase,
+	'Renda Extra': IconCoins,
+	'Outras Receitas': IconGift,
 }
 
 export const corPorTipo: Record<TipoTransacao, string> = {
