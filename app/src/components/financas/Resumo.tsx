@@ -1,76 +1,125 @@
-import ResumoItem from './ResumoItem'
-import ResumoMaiorDespesa from './ResumoMaiorDespesa'
-import Transacao from '../../logic/core/financas/Transacao'
-import { TipoTransacao } from '../../logic/core/financas/TipoTransacao'
+import { Alert, Badge, Group, SimpleGrid, Text, ThemeIcon } from '@mantine/core'
 import {
-	IconArrowsDoubleNeSw,
-	IconCalendarDollar,
-	IconCashPlus,
-	IconCreditCard,
+	IconAlertCircle,
+	IconArrowDownLeft,
+	IconArrowUpRight,
 	IconPigMoney,
-	IconTrendingUp,
+	IconScale,
 } from '@tabler/icons-react'
-import TituloPagina from '../template/TituloPagina'
+import { ReactNode } from 'react'
+import { ResumoMensal } from '../../logic/core/financas/ResumoMensal'
+import Dinheiro from '../../logic/utils/Dinheiro'
+import Cartao from '../template/Cartao'
 
-interface ResumoProps {
-	transacoes: Transacao[]
-	className?: string
+function porcentagem(parte: number, total: number) {
+	if (!total) return null
+	return (parte / total).toLocaleString('pt-BR', { style: 'percent', maximumFractionDigits: 1 })
 }
 
-export default function Resumo(props: ResumoProps) {
-	const totalizar = (total: number, r: Transacao) => total + r.valor
+interface ItemProps {
+	titulo: string
+	valor: string
+	cor?: string
+	detalhe?: string | null
+	destaque: ReactNode
+}
 
-	const receitas = props.transacoes
-		.filter((r) => r.tipo === TipoTransacao.RECEITA)
-		.reduce(totalizar, 0)
+function Item(props: ItemProps) {
+	return (
+		<Cartao p="md">
+			<Group justify="space-between" mb="xs">
+				<Text c="dark.2" fw={500} size="sm">
+					{props.titulo}
+				</Text>
+				{props.destaque}
+			</Group>
+			<Text fz={{ base: 20, sm: 26 }} fw={800} c={props.cor ?? 'bright'}>
+				{props.valor}
+			</Text>
+			{props.detalhe && (
+				<Text size="xs" c="dimmed" mt={4}>
+					{props.detalhe}
+				</Text>
+			)}
+		</Cartao>
+	)
+}
 
-	const despesas = props.transacoes
-		.filter((r) => r.tipo === TipoTransacao.DESPESA)
-		.reduce(totalizar, 0)
-
-	const guardado = props.transacoes
-		.filter((r) => r.tipo === TipoTransacao.GUARDADO)
-		.reduce(totalizar, 0)
-
-	const total = receitas - despesas - guardado
+export default function Resumo(props: { resumo: ResumoMensal }) {
+	const r = props.resumo
+	const saldoNegativo = r.saldo < 0
+	const lancamentos = r.qtdReceitas === 1 ? '1 lançamento' : `${r.qtdReceitas} lançamentos`
 
 	return (
-		<div className="flex flex-col">
-			<TituloPagina
-				icone={<IconCalendarDollar />}
-				principal="Resumo mensal"
-				secundario="Acompanhe o que você gastou no mês"
-			/>
-			<div className={`grid grid-cols-1 lg:grid-cols-2 gap-3 ${props.className ?? ''}`}>
-				<ResumoItem
+		<>
+			{saldoNegativo && (
+				<Alert
+					variant="light"
+					color="red"
+					icon={<IconAlertCircle size={20} />}
+					styles={{ message: { color: 'var(--mantine-color-red-1)' } }}
+				>
+					Você gastou <strong>{Dinheiro.formatar(Math.abs(r.saldo))} a mais</strong> do
+					que recebeu neste mês.
+				</Alert>
+			)}
+			<SimpleGrid cols={{ base: 2, lg: 4 }} spacing={{ base: 'sm', sm: 'md' }}>
+				<Item
 					titulo="Receitas"
-					valor={receitas}
-					icone={<IconCashPlus />}
-					iconeClassName="text-green-500"
+					valor={Dinheiro.formatar(r.receitas)}
+					detalhe={r.qtdReceitas ? lancamentos : 'Nenhuma receita no mês'}
+					destaque={
+						<ThemeIcon variant="light" color="green" radius="md" size={34}>
+							<IconArrowDownLeft size={18} />
+						</ThemeIcon>
+					}
 				/>
-				<ResumoItem
+				<Item
 					titulo="Despesas"
-					valor={despesas}
-					icone={<IconCreditCard />}
-					iconeClassName="text-red-500"
+					valor={Dinheiro.formatar(r.despesas)}
+					detalhe={
+						r.receitas ? `${porcentagem(r.despesas, r.receitas)} do que entrou` : null
+					}
+					destaque={
+						<ThemeIcon variant="light" color="red" radius="md" size={34}>
+							<IconArrowUpRight size={18} />
+						</ThemeIcon>
+					}
 				/>
-				<ResumoItem
-					titulo="Guardado / Investido"
-					valor={guardado}
-					icone={<IconPigMoney />}
-					iconeClassName="text-blue-500"
-					valorClassName={guardado > 0 ? 'text-green-400' : ''}
+				<Item
+					titulo="Guardado / investido"
+					valor={Dinheiro.formatar(r.guardado)}
+					detalhe={
+						r.guardado
+							? r.receitas
+								? `${porcentagem(r.guardado, r.receitas)} das receitas`
+								: null
+							: 'Nada guardado este mês'
+					}
+					destaque={
+						<ThemeIcon variant="light" color="blue" radius="md" size={34}>
+							<IconPigMoney size={18} />
+						</ThemeIcon>
+					}
 				/>
-				<ResumoItem
+				<Item
 					titulo="Saldo do mês"
-					valor={total}
-					icone={<IconArrowsDoubleNeSw />}
-					iconeClassName="text-white"
-					valorClassName={total > 0 ? 'text-green-400' : total < 0 ? 'text-red-400' : ''}
+					valor={`${saldoNegativo ? '−' : ''}${Dinheiro.formatar(Math.abs(r.saldo))}`}
+					cor={saldoNegativo ? 'red.4' : r.saldo > 0 ? 'green.4' : 'bright'}
+					detalhe="Receitas − despesas − guardado"
+					destaque={
+						r.saldo === 0 ? (
+							<ThemeIcon variant="light" color="gray" radius="md" size={34}>
+								<IconScale size={18} />
+							</ThemeIcon>
+						) : (
+							<Badge variant="light" color={saldoNegativo ? 'red' : 'green'}>
+								{saldoNegativo ? 'Negativo' : 'Positivo'}
+							</Badge>
+						)
+					}
 				/>
-			</div>
-			{/* <TituloPagina principal='Maiores despesas' icone={<IconTrendingUp/>}/>
-			<ResumoMaiorDespesa/> */}
-		</div>
+			</SimpleGrid>
+		</>
 	)
 }

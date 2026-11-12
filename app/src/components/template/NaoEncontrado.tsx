@@ -1,14 +1,16 @@
-import { IconCircleX } from "@tabler/icons-react"
+import { Text } from '@mantine/core'
+import { IconReceiptOff } from '@tabler/icons-react'
 
-interface NaoEnontradoProps {
-    children: any
-}
-
-export default function NaoEncontrado(props: NaoEnontradoProps) {
-    return (
-        <div className="flex flex-col items-center rounded-lg text-zinc-700 py-7">
-            <IconCircleX size={80} stroke={1}/>
-            <span className="text-lg">{props.children}</span>
-        </div>
-    )
+export default function NaoEncontrado(props: { children: string }) {
+	return (
+		<div className="flex flex-col items-center gap-2 py-12">
+			<IconReceiptOff
+				size={56}
+				stroke={1.2}
+				color="var(--mantine-color-dark-3)"
+				aria-hidden
+			/>
+			<Text c="dimmed">{props.children}</Text>
+		</div>
+	)
 }

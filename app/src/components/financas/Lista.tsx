@@ -1,57 +1,74 @@
-import { IconCalendarWeek } from '@tabler/icons-react'
+import { Group, Text } from '@mantine/core'
 import Transacao from '../../logic/core/financas/Transacao'
-import Data from '../../logic/utils/Data'
-import Dinheiro from '../../logic/utils/Dinheiro'
-import IconeTransacao from './IconeTransacao'
 import { TipoTransacao } from '../../logic/core/financas/TipoTransacao'
+import { maisRecentesPrimeiro } from '../../logic/core/financas/ResumoMensal'
+import Dinheiro from '../../logic/utils/Dinheiro'
+import Cartao from '../template/Cartao'
+import LinhaTransacao from './LinhaTransacao'
 
 interface ListaProps {
 	transacoes: Transacao[]
-	abrirEditar: () => void
-	selecionarTransacao?: (transacao: Transacao) => void
+	aoClicar: (transacao: Transacao) => void
+}
+
+interface Dia {
+	chave: string
+	data: Date
+	itens: Transacao[]
+	saldo: number
+}
+
+// Agrupa por dia, do mais recente para o mais antigo
+export function agruparPorDia(transacoes: Transacao[]): Dia[] {
+	const dias = new Map<string, Dia>()
+	for (const t of [...transacoes].sort(maisRecentesPrimeiro)) {
+		const data = new Date(t.data)
+		const chave = data.toDateString()
+		const dia = dias.get(chave) ?? { chave, data, itens: [], saldo: 0 }
+		dia.itens.push(t)
+		dia.saldo += t.tipo === TipoTransacao.RECEITA ? t.valor : -t.valor
+		dias.set(chave, dia)
+	}
+	return [...dias.values()]
 }
 
 export default function Lista(props: ListaProps) {
-	function renderizarLinha(transacao: Transacao, indice: number) {
-		function renderizarCor() {
-			var cor
-
-			if (transacao.tipo === TipoTransacao.RECEITA) {
-				cor = 'bg-green-500/50'
-			} else if (transacao.tipo === TipoTransacao.DESPESA) {
-				cor = 'bg-red-500/50'
-			} else {
-				cor = 'bg-blue-500/50'
-			}
-			return cor
-		}
-
-		return (
-			<div
-				key={transacao.id}
-				className={`flex items-center gap-3 p-1.5 px-2 md:px-7 cursor-pointer ${indice % 2 === 0 ? 'bg-zinc-900' : 'bg-zinc-900/60'}`}
-				onClick={() => {
-					;(props.selecionarTransacao?.(transacao), props.abrirEditar())
-				}}
-			>
-				<div className={`rounded-lg ${renderizarCor()} `}>
-					<IconeTransacao src={transacao.categoria} />
-				</div>
-				<span className="w-full md:w-1/2">{transacao.descricao}</span>
-				<span className="flex-1 hidden md:inline">
-					<div className="flex gap-2 ">
-						<IconCalendarWeek stroke={1} />
-						<span>{Data.ddmmyy.formatar(transacao.data)}</span>
-					</div>
-				</span>
-				<span>{Dinheiro.formatar(transacao.valor)}</span>
-			</div>
-		)
-	}
-
 	return (
-		<div className="flex flex-col border border-zinc-700 rounded-xl ">
-			{props.transacoes.map(renderizarLinha)}
+		<div className="flex flex-col gap-4">
+			{agruparPorDia(props.transacoes).map((dia) => (
+				<Cartao key={dia.chave} component="section" p={0} className="overflow-hidden">
+					<Group justify="space-between" px="md" py={10} bg="dark.6">
+						<Text
+							component="h2"
+							size="xs"
+							fw={700}
+							tt="uppercase"
+							c="dark.1"
+							style={{ letterSpacing: 0.5 }}
+						>
+							{dia.data.toLocaleDateString('pt-BR', {
+								weekday: 'short',
+								day: 'numeric',
+								month: 'long',
+							})}
+						</Text>
+						<Text size="sm" c="dark.2">
+							{dia.saldo < 0 ? '−' : '+'}
+							{Dinheiro.formatar(Math.abs(dia.saldo))}
+						</Text>
+					</Group>
+					<div>
+						{dia.itens.map((t, i) => (
+							<LinhaTransacao
+								key={t.id}
+								transacao={t}
+								divisoria={i > 0}
+								aoClicar={props.aoClicar}
+							/>
+						))}
+					</div>
+				</Cartao>
+			))}
 		</div>
 	)
 }

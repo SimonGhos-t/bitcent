@@ -1,42 +1,40 @@
 'use client'
 import { Button } from '@mantine/core'
-import { IconCashBanknotePlus } from '@tabler/icons-react'
-import { useDisclosure } from '@mantine/hooks'
+import { IconPlus } from '@tabler/icons-react'
+import { useMemo } from 'react'
 import useTransacao from '../../src/data/hooks/useTransacao'
 import CampoMesAno from '../../src/components/template/CampoMesAno'
 import Resumo from '../../src/components/financas/Resumo'
+import PainelMes from '../../src/components/financas/PainelMes'
 import PaginaInicial from '@/app/src/components/template/PaginaInicial'
-import ModalTransacao from '@/app/src/components/financas/ModalTransacao'
+import { calcularResumo } from '@/app/src/logic/core/financas/ResumoMensal'
+import Data from '@/app/src/logic/utils/Data'
 
 export default function Inicio() {
-	const { data, alterarData, transacoes, transacaoSelecionada, selecionar, salvar, excluir } =
-		useTransacao()
-	const [modalAberto, { open: abrirModal, close: fecharModal }] = useDisclosure(false)
+	const { data, alterarData, transacoes, abrirNova, abrirEdicao } = useTransacao()
+	const resumo = useMemo(() => calcularResumo(transacoes), [transacoes])
+	const mes = Data.mmyy.formatar(data).split(' de ')[0]
 
 	return (
-		<PaginaInicial>
-			<Resumo transacoes={transacoes} className="mb-5" />
-			<div className="flex flex-1 justify-between">
-				<Button
-					leftSection={<IconCashBanknotePlus />}
-					onClick={() => {
-						selecionar(null)
-						abrirModal()
-					}}
-					className="mb-2 min-h-10"
-					size="md"
-				>
-					Nova transação
-				</Button>
-				<CampoMesAno data={data} dataMudou={alterarData} />
-			</div>
-			<ModalTransacao
-				aberto={modalAberto}
-				fechar={fecharModal}
-				transacao={transacaoSelecionada}
-				salvar={salvar}
-				excluir={excluir}
-			/>
+		<PaginaInicial
+			titulo={`Resumo de ${mes}`}
+			subtitulo="Quanto entrou, quanto saiu e para onde foi."
+			acoes={
+				<>
+					<CampoMesAno data={data} dataMudou={alterarData} />
+					<Button
+						visibleFrom="sm"
+						size="md"
+						leftSection={<IconPlus size={18} stroke={2.2} />}
+						onClick={abrirNova}
+					>
+						Nova transação
+					</Button>
+				</>
+			}
+		>
+			<Resumo resumo={resumo} />
+			<PainelMes resumo={resumo} aoClicar={abrirEdicao} />
 		</PaginaInicial>
 	)
 }

@@ -1,88 +1,163 @@
 'use client'
-import ModalTransacao from '@/app/src/components/financas/ModalTransacao'
+import { Button, Group, Paper, SegmentedControl, Select, Text, TextInput } from '@mantine/core'
+import { IconLayoutGrid, IconList, IconPlus, IconSearch } from '@tabler/icons-react'
+import { useMemo, useState } from 'react'
 import Grade from '@/app/src/components/financas/Grade'
 import Lista from '@/app/src/components/financas/Lista'
 import CampoMesAno from '@/app/src/components/template/CampoMesAno'
 import NaoEncontrado from '@/app/src/components/template/NaoEncontrado'
 import PaginaInicial from '@/app/src/components/template/PaginaInicial'
-import TituloPagina from '@/app/src/components/template/TituloPagina'
 import useTransacao, { TipoExibicao } from '@/app/src/data/hooks/useTransacao'
-import { SegmentedControl } from '@mantine/core'
-import { useDisclosure } from '@mantine/hooks'
-import { IconLayoutGrid, IconList, IconReportMoney } from '@tabler/icons-react'
-import { useState } from 'react'
+import { calcularResumo } from '@/app/src/logic/core/financas/ResumoMensal'
+import { TipoTransacao } from '@/app/src/logic/core/financas/TipoTransacao'
+import Dinheiro from '@/app/src/logic/utils/Dinheiro'
+import categorias from '@/app/src/data/constants/categorias'
+
+// Ignora maiúsculas e acentos na busca
+function normalizar(texto: string) {
+	return (texto ?? '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase()
+}
 
 export default function Transacoes() {
 	const {
 		tipoExibicao,
 		transacoes,
 		data,
-		transacaoSelecionada,
-		excluir,
-		salvar,
-		selecionar,
+		carregando,
 		alterarData,
 		alterarTipoExibicao,
+		abrirNova,
+		abrirEdicao,
 	} = useTransacao()
-	const [editarTransacaoAberta, { open: editarTransacao, close: fecharEdicao }] =
-		useDisclosure(false)
+	const [busca, setBusca] = useState('')
+	const [tipo, setTipo] = useState<'todas' | TipoTransacao>('todas')
+	const [categoria, setCategoria] = useState<string | null>(null)
 
-	function renderizarTransacoes() {
-		return tipoExibicao === 'grade' ? (
-			<Grade
-				transacoes={transacoes}
-				selecionarTransacao={selecionar}
-				abrirEditar={editarTransacao}
-			/>
-		) : (
-			<Lista
-				transacoes={transacoes}
-				selecionarTransacao={selecionar}
-				abrirEditar={editarTransacao}
-			/>
+	const filtradas = useMemo(() => {
+		const termo = normalizar(busca.trim())
+		return transacoes.filter(
+			(t) =>
+				(tipo === 'todas' || t.tipo === tipo) &&
+				(!categoria || t.categoria === categoria) &&
+				(!termo || normalizar(`${t.descricao} ${t.categoria}`).includes(termo)),
 		)
-	}
+	}, [transacoes, busca, tipo, categoria])
 
-	function renderizarBotoes() {
-		return (
-			<div className="flex justify-between items-center">
-				<CampoMesAno data={data} dataMudou={alterarData} />
-				<div className="flex justify-center items-center gap-2">
-					<SegmentedControl
-						data={[
-							{ label: <IconLayoutGrid />, value: 'grade' },
-							{ label: <IconList />, value: 'lista' },
-						]}
-						onChange={(tipo) => alterarTipoExibicao(tipo as TipoExibicao)}
-					/>
-				</div>
-			</div>
-		)
-	}
+	const totais = calcularResumo(filtradas)
+	const filtrando = busca.trim() !== '' || tipo !== 'todas' || !!categoria
 
 	return (
-		<PaginaInicial>
-			<TituloPagina
-				icone={<IconReportMoney />}
-				principal="Meus Registros"
-				secundario="Todas as transações cadastradas"
-			/>
-			<ModalTransacao
-				aberto={editarTransacaoAberta}
-				fechar={fecharEdicao}
-				transacao={transacaoSelecionada}
-				salvar={salvar}
-				excluir={excluir}
-			/>
-			{renderizarBotoes()}
-			<div className="flex flex-col h-full">
-				{transacoes.length ? (
-					renderizarTransacoes()
+		<PaginaInicial
+			titulo="Transações"
+			subtitulo="Todos os lançamentos do mês, do mais recente ao mais antigo."
+			acoes={
+				<>
+					<CampoMesAno data={data} dataMudou={alterarData} />
+					<Button
+						visibleFrom="sm"
+						size="md"
+						leftSection={<IconPlus size={18} stroke={2.2} />}
+						onClick={abrirNova}
+					>
+						Nova transação
+					</Button>
+				</>
+			}
+		>
+			<Group gap="sm" wrap="wrap">
+				<TextInput
+					className="flex-1 min-w-60"
+					placeholder="Buscar por subcategoria ou categoria"
+					aria-label="Buscar transação"
+					leftSection={<IconSearch size={16} />}
+					value={busca}
+					onChange={(e) => setBusca(e.currentTarget.value)}
+				/>
+				<SegmentedControl
+					aria-label="Tipo"
+					value={tipo}
+					onChange={(valor) => setTipo(valor as typeof tipo)}
+					data={[
+						{ label: 'Todas', value: 'todas' },
+						{ label: 'Receitas', value: TipoTransacao.RECEITA },
+						{ label: 'Despesas', value: TipoTransacao.DESPESA },
+						{ label: 'Guardado', value: TipoTransacao.GUARDADO },
+					]}
+				/>
+				<Select
+					aria-label="Categoria"
+					placeholder="Todas as categorias"
+					clearable
+					searchable
+					w={210}
+					data={categorias.map((c) => c.nome)}
+					value={categoria}
+					onChange={setCategoria}
+				/>
+				<SegmentedControl
+					aria-label="Modo de exibição"
+					value={tipoExibicao}
+					onChange={(valor) => alterarTipoExibicao(valor as TipoExibicao)}
+					data={[
+						{
+							value: 'lista',
+							label: <IconList size={18} aria-label="Lista" />,
+						},
+						{
+							value: 'grade',
+							label: <IconLayoutGrid size={18} aria-label="Grade" />,
+						},
+					]}
+				/>
+			</Group>
+
+			<Paper withBorder radius="md" px="md" py="sm" bg="dark.7">
+				<Group gap="xl" wrap="wrap" style={{ rowGap: 4 }}>
+					<Text>
+						Receitas{' '}
+						<Text span fw={700} c="green.4">
+							+{Dinheiro.formatar(totais.receitas)}
+						</Text>
+					</Text>
+					<Text>
+						Despesas{' '}
+						<Text span fw={700} c="red.4">
+							−{Dinheiro.formatar(totais.despesas)}
+						</Text>
+					</Text>
+					{totais.guardado > 0 && (
+						<Text>
+							Guardado{' '}
+							<Text span fw={700} c="blue.3">
+								{Dinheiro.formatar(totais.guardado)}
+							</Text>
+						</Text>
+					)}
+					<Text>
+						Saldo{' '}
+						<Text span fw={700} c={totais.saldo < 0 ? 'red.4' : 'green.4'}>
+							{totais.saldo < 0 ? '−' : '+'}
+							{Dinheiro.formatar(Math.abs(totais.saldo))}
+						</Text>
+					</Text>
+				</Group>
+			</Paper>
+
+			{filtradas.length ? (
+				tipoExibicao === 'grade' ? (
+					<Grade transacoes={filtradas} aoClicar={abrirEdicao} />
 				) : (
-					<NaoEncontrado>Nenhuma transação encontrada</NaoEncontrado>
-				)}
-				{/* <Pagination total={transacoes.length} className='self-center'/> */}
-			</div>
+					<Lista transacoes={filtradas} aoClicar={abrirEdicao} />
+				)
+			) : (
+				!carregando && (
+					<NaoEncontrado>
+						{filtrando
+							? 'Nenhuma transação com esses filtros'
+							: 'Nenhuma transação neste mês'}
+					</NaoEncontrado>
+				)
+			)}
 		</PaginaInicial>
 	)
 }

@@ -1,33 +1,68 @@
 'use client'
-import { Button } from '@mantine/core'
+import { Badge, Button, Group, Paper, Text, Title } from '@mantine/core'
+import { ReactNode, useState } from 'react'
 
 interface MiniFormularioProps {
 	titulo: string
 	descricao: string
 	msgRodape: string
 	podeSalvar: boolean
-	salvar: () => void
-	children: React.ReactNode
+	salvar: () => Promise<void> | void
+	opcional?: boolean
+	children: ReactNode
 }
 
 export default function MiniFormulario(props: MiniFormularioProps) {
+	const [salvando, setSalvando] = useState(false)
+
+	async function salvar() {
+		if (!props.podeSalvar) return
+		setSalvando(true)
+		try {
+			await props.salvar()
+		} finally {
+			setSalvando(false)
+		}
+	}
+
 	return (
-		<div className="flex flex-col overflow-hidden border border-zinc-800 rounded-lg">
-			<div className="flex flex-col p-7">
-				<div className="text-2xl font-black">{props.titulo}</div>
-				<div className="mt-3 text-zinc-400">{props.descricao}</div>
-				<div className="mt-3">{props.children}</div>
-			</div>
-			<div className="flex justify-end sm:justify-between items-center bg-black px-7 py-5">
-				<span className="hidden sm:inline text-zinc-400">{props.msgRodape}</span>
-				<Button
-					color={props.podeSalvar ? 'green' : 'gray'}
-					className={props.podeSalvar ? 'bg-green-500' : 'bg-gray-500' }
-					onClick={() => (props.podeSalvar ? props.salvar() : null)}
+		<Paper component="section" withBorder radius="lg" bg="dark.7" className="overflow-hidden">
+			<form
+				onSubmit={(e) => {
+					e.preventDefault()
+					salvar()
+				}}
+			>
+				<div className="flex flex-col gap-3 p-6">
+					<Group gap="xs">
+						<Title order={2} size="h4" c="bright">
+							{props.titulo}
+						</Title>
+						{props.opcional && (
+							<Badge variant="default" size="sm">
+								Opcional
+							</Badge>
+						)}
+					</Group>
+					<Text c="dark.2">{props.descricao}</Text>
+					{props.children}
+				</div>
+				<Group
+					justify="space-between"
+					gap="sm"
+					px="lg"
+					py="sm"
+					bg="dark.8"
+					style={{ borderTop: '1px solid var(--mantine-color-dark-6)' }}
 				>
-					Salvar
-				</Button>
-			</div>
-		</div>
+					<Text size="sm" c="dimmed">
+						{props.msgRodape}
+					</Text>
+					<Button type="submit" disabled={!props.podeSalvar} loading={salvando}>
+						Salvar
+					</Button>
+				</Group>
+			</form>
+		</Paper>
 	)
 }

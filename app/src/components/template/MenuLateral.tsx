@@ -1,85 +1,71 @@
 'use client'
 import Link from 'next/link'
-import {
-	IconArrowsRightLeft,
-	IconHomeDollar,
-	IconLogout,
-	IconReportMoney,
-	IconUser,
-	IconX,
-} from '@tabler/icons-react'
-import React, { useContext, useState } from 'react'
+import { usePathname } from 'next/navigation'
+import { useContext } from 'react'
+import { Avatar, Box, NavLink, Stack, Text, UnstyledButton } from '@mantine/core'
+import { IconLogout } from '@tabler/icons-react'
 import AutenticacaoContext from '../../data/contexts/AutenticacaoContext'
 import Logo from './Logo'
-import { usePathname } from 'next/navigation'
+import { itensMenu } from './itensMenu'
 
-interface MenuLateralProps {
-	aberto: boolean
-	aoAlternar: () => void
-}
-
-export default function MenuLateral(props: MenuLateralProps) {
-	const { logout } = useContext(AutenticacaoContext)
+// Menu do computador. No celular a navegação fica na BarraInferior.
+export default function MenuLateral() {
+	const { usuario, logout } = useContext(AutenticacaoContext)
 	const caminho = usePathname()
 
 	return (
-		<div
-			className={`flex flex-col h-screen border-r bg-black border-zinc-800 sm:transition-all sm:duration-300 overflow-hidden z-30 ${props.aberto ? 'w-60 sm:w-80 p-3 absolute sm:relative' : 'w-0 p-0 border-0'}`}
+		<Box
+			component="nav"
+			aria-label="Principal"
+			visibleFrom="sm"
+			w={240}
+			p="md"
+			className="shrink-0 h-screen flex flex-col gap-6"
+			style={{ borderRight: '1px solid var(--mantine-color-dark-5)' }}
 		>
-			<div className="flex items-center justify-between">
-				<Logo />
-				<BotaoFecharMenu fecharMenu={props.aoAlternar} />
-			</div>
-			<div className="flex flex-col flex-1 pt-7 border-y border-zinc-800">
-				<Link href={'/inicio'}>
-					<MenuItem
-						icone={<IconHomeDollar />}
-						nome="Início"
-						selecionado={caminho.startsWith('/inicio')}
+			<Logo />
+			<Stack gap={4} className="flex-1">
+				{itensMenu.map((item) => (
+					<NavLink
+						key={item.href}
+						component={Link}
+						href={item.href}
+						label={item.nome}
+						leftSection={<item.icone size={20} stroke={1.8} />}
+						active={caminho.startsWith(item.href)}
+						variant="light"
+						style={{ borderRadius: 'var(--mantine-radius-md)' }}
+						fw={600}
 					/>
-				</Link>
-				<Link href={'/transacoes'}>
-					<MenuItem icone={<IconReportMoney />} nome="Transações" selecionado={caminho.startsWith('/transacoes')}/>
-				</Link>
-				<Link href={'/usuario'}>
-					<MenuItem icone={<IconUser />} nome="Meus Dados" selecionado={caminho.startsWith('/usuario')}/>
-				</Link>
-			</div>
-			<div className="flex flex-col py-7">
-				<MenuItem icone={<IconLogout />} nome="Sair" onClick={logout} />
-			</div>
-		</div>
-	)
-}
-
-interface MenuItemProps {
-	nome: string
-	icone: React.ReactElement<{ size?: number; stroke?: number }>
-	selecionado?: boolean
-	onClick?: () => void
-	className?: string
-}
-
-function MenuItem(props: MenuItemProps) {
-	const [ativo, setAtivo] = useState(false)
-	return (
-		<div
-			onClick={props.onClick}
-			className={`flex gap-2.5 p-3 rounded-md items-center  cursor-pointer ${props.selecionado ? 'bg-linear-to-r bg-blue-500 to-cyan-500 text-white' : 'hover:bg-zinc-700 hover:text-white text-zinc-400'}`}
-		>
-			{React.cloneElement(props.icone, {
-				size: 25,
-				stroke: 1,
-			})}
-			<span>{props.nome}</span>
-		</div>
-	)
-}
-
-function BotaoFecharMenu(props: { fecharMenu: () => void }) {
-	return (
-		<div className="text-zinc-300 sm:hidden" onClick={props.fecharMenu}>
-			<IconX size={25} />
-		</div>
+				))}
+			</Stack>
+			<Stack gap="sm" pt="md" style={{ borderTop: '1px solid var(--mantine-color-dark-5)' }}>
+				<div className="flex items-center gap-3 px-2 min-w-0">
+					<Avatar
+						src={usuario?.imagemUrl ?? undefined}
+						name={usuario?.nome}
+						radius="xl"
+					/>
+					<div className="flex flex-col min-w-0">
+						<Text fw={600} c="bright" truncate>
+							{usuario?.nome}
+						</Text>
+						<Text size="xs" c="dimmed" truncate>
+							{usuario?.email}
+						</Text>
+					</div>
+				</div>
+				<UnstyledButton
+					onClick={logout}
+					className="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-(--mantine-color-dark-6)"
+					c="dark.1"
+				>
+					<IconLogout size={20} stroke={1.8} />
+					<Text fw={600} size="sm">
+						Sair
+					</Text>
+				</UnstyledButton>
+			</Stack>
+		</Box>
 	)
 }

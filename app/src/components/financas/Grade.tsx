@@ -1,63 +1,47 @@
-import useCategorias from '../../data/hooks/useCategorias'
-import { TipoTransacao } from '../../logic/core/financas/TipoTransacao'
+import { Group, SimpleGrid, Text, UnstyledButton } from '@mantine/core'
 import Transacao from '../../logic/core/financas/Transacao'
+import { maisRecentesPrimeiro } from '../../logic/core/financas/ResumoMensal'
 import Data from '../../logic/utils/Data'
-import Dinheiro from '../../logic/utils/Dinheiro'
 import IconeTransacao from './IconeTransacao'
+import ValorTransacao from './ValorTransacao'
 
 export interface GradeProps {
 	transacoes: Transacao[]
-	abrirEditar: () => void
-	selecionarTransacao?: (transacao: Transacao) => void
+	aoClicar: (transacao: Transacao) => void
 }
 
 export default function Grade(props: GradeProps) {
-	const { iconeCategoria } = useCategorias()
-
-	function renderizarItem(transacao: Transacao) {
-		function renderizarCor() {
-			var cor = 'bg-blue-500'
-
-			if (transacao.tipo === TipoTransacao.RECEITA) {
-				cor = 'from-green-400 via-green-500 to-green-800'
-			} else if (transacao.tipo === TipoTransacao.DESPESA) {
-				cor = 'from-red-400 via-red-500 to-red-700'
-			} else {
-				cor = 'from-blue-400 via-blue-500 to-blue-800'
-			}
-			return cor
-		}
-
-		return (
-			<div
-				key={transacao.id}
-				className="relative flex flex-col justify-between p-4 gap-2 text-white h-24 cursor-pointer"
-				onClick={() => {
-					;(props.selecionarTransacao?.(transacao), props.abrirEditar())
-				}}
-			>
-				<div
-					className={`absolute top-0 left-0 w-full h-full bg-linear-to-r opacity-50 rounded-lg ${renderizarCor()}`}
-				></div>
-				<div className="flex justify-between items-center">
-					<span className="z-10 font-light opacity-80">{`${transacao.categoria ?? ''} ${transacao.categoria ? '>' : ''} ${transacao.descricao ?? ''}`}</span>
-					<span className="z-10 font-light text-xs opacity-75">
-						{Data.ddmm.formatar(transacao.data)}
-					</span>
-				</div>
-				<span className="flex justify-between z-10 text-3xl font-black">
-					{Dinheiro.formatar(transacao.valor)}
-					<IconeTransacao src={transacao.categoria} />
-				</span>
-			</div>
-		)
-	}
-
 	return (
-		<div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-4 gap-5">
-			{props.transacoes.map(renderizarItem)}
-		</div>
+		<SimpleGrid cols={{ base: 1, xs: 2, md: 3, xl: 4 }} spacing="md">
+			{[...props.transacoes].sort(maisRecentesPrimeiro).map((t) => (
+				<UnstyledButton
+					key={t.id}
+					onClick={() => props.aoClicar(t)}
+					aria-label={`Editar ${t.descricao || t.categoria}`}
+					p="md"
+					className="flex flex-col gap-3 rounded-xl transition-colors"
+					style={{
+						border: '1px solid var(--mantine-color-dark-5)',
+						background: 'var(--mantine-color-dark-7)',
+					}}
+				>
+					<Group justify="space-between" wrap="nowrap" gap="sm">
+						<IconeTransacao categoria={t.categoria} tipo={t.tipo} />
+						<Text size="xs" c="dimmed">
+							{Data.ddmm.formatar(new Date(t.data))}
+						</Text>
+					</Group>
+					<div className="min-w-0">
+						<Text fw={600} c="bright" truncate>
+							{t.descricao || t.categoria || 'Sem categoria'}
+						</Text>
+						<Text size="xs" c="dimmed" truncate>
+							{t.categoria}
+						</Text>
+					</div>
+					<ValorTransacao valor={t.valor} tipo={t.tipo} fz="xl" />
+				</UnstyledButton>
+			))}
+		</SimpleGrid>
 	)
 }
-
-//transacao.tipo === TipoTransacao.RECEITA ? 'from-teal-500 via-green-600 to-teal-700' : 'from-pink-500 via-red-600 to-pink-700'

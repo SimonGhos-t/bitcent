@@ -1,50 +1,8 @@
-import { useContext, useEffect, useState } from 'react'
-import Transacao from '../../logic/core/financas/Transacao'
-import AutenticacaoContext from '../contexts/AutenticacaoContext'
-import servicos from '../../logic/core'
-import { useRouter } from 'next/navigation'
+import { useContext } from 'react'
+import TransacaoContext from '../contexts/TransacaoContext'
 
-export type TipoExibicao = 'lista' | 'grade'
+export type { TipoExibicao } from '../contexts/TransacaoContext'
 
 export default function useTransacao() {
-	const { usuario } = useContext(AutenticacaoContext)
-	const [data, setData] = useState<Date>(new Date())
-	const [tipoExibicao, setTipoExibicao] = useState<TipoExibicao>('grade')
-	const [transacoes, setTransacoes] = useState<Transacao[]>([])
-	const [transacaoSelecionada, setTransacao] = useState<Transacao | null>(null)
-	const router = useRouter()
-
-	useEffect(() => {
-		buscarTransacoes()
-	}, [data, router])
-
-	async function buscarTransacoes() {
-		if (!usuario) return
-		const transacoes = await servicos.transacao.consultarPorMes(usuario, data)
-		setTransacoes(transacoes)
-	}
-
-	async function salvar(transacao: Transacao) {
-		if (!usuario) return
-		await servicos.transacao.salvar(transacao, usuario)
-		await buscarTransacoes()
-	}
-
-	async function excluir(transacao: Transacao) {
-		if (!usuario) return
-		await servicos.transacao.excluir(transacao, usuario)
-		await buscarTransacoes()
-	}
-
-	return {
-		data,
-		transacoes,
-		transacaoSelecionada,
-		tipoExibicao,
-		salvar,
-		excluir,
-		selecionar: setTransacao,
-		alterarData: setData,
-		alterarTipoExibicao: setTipoExibicao,
-	}
+	return useContext(TransacaoContext)
 }

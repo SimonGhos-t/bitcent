@@ -1,29 +1,69 @@
 'use client'
-import Cabecalho from './Cabecalho'
-import Conteudo from './Conteudo'
-import MenuLateral from './MenuLateral'
-import Pagina from './Pagina'
-import { ReactNode } from 'react'
-import { useDisclosure } from '@mantine/hooks'
+import { ReactNode, useContext } from 'react'
 import { redirect } from 'next/navigation'
+import { Avatar, Group, Stack, Text, Title } from '@mantine/core'
+import AutenticacaoContext from '../../data/contexts/AutenticacaoContext'
+import MenuLateral from './MenuLateral'
+import BarraInferior from './BarraInferior'
+import Pagina from './Pagina'
 
 interface PaginaInicialProps {
+	titulo?: string
+	subtitulo?: string
+	// Botões e campos à direita do título (ex.: mês, nova transação)
+	acoes?: ReactNode
 	children?: ReactNode
 }
 
 export default function PaginaInicial(props: PaginaInicialProps) {
-	const [menuAberto, { toggle: alternarMenu }] = useDisclosure(true)
+	const { usuario } = useContext(AutenticacaoContext)
 	if (!props.children) {
 		return redirect('/inicio')
 	}
 
 	return (
 		<Pagina>
-			<MenuLateral aberto={menuAberto} aoAlternar={alternarMenu} />
-			<div className={`flex flex-col w-full`}>
-			<Cabecalho aberto={menuAberto} aoAlternar={alternarMenu} />
-				<Conteudo>{props.children}</Conteudo>
-			</div>
+			<MenuLateral />
+			<main className="flex-1 min-w-0 h-screen overflow-y-auto">
+				{/* Topo do celular */}
+				<Group hiddenFrom="sm" gap="sm" px="md" pt="md">
+					<Avatar
+						src={usuario?.imagemUrl ?? undefined}
+						name={usuario?.nome}
+						radius="xl"
+					/>
+					<Stack gap={0}>
+						<Text size="xs" c="dimmed">
+							Olá,
+						</Text>
+						<Text fw={700} c="bright">
+							{usuario?.nome?.split(' ')[0]}
+						</Text>
+					</Stack>
+				</Group>
+
+				<div className="w-full max-w-310 px-4 pt-4 pb-28 sm:px-10 sm:pt-8 sm:pb-12 flex flex-col gap-6">
+					{(props.titulo || props.acoes) && (
+						<Group justify="space-between" align="flex-end" gap="md">
+							<Stack gap={4}>
+								{props.titulo && (
+									<Title order={1} size="h2" fw={900} c="bright">
+										{props.titulo}
+									</Title>
+								)}
+								{props.subtitulo && <Text c="dimmed">{props.subtitulo}</Text>}
+							</Stack>
+							{props.acoes && (
+								<Group gap="sm" wrap="wrap">
+									{props.acoes}
+								</Group>
+							)}
+						</Group>
+					)}
+					{props.children}
+				</div>
+			</main>
+			<BarraInferior />
 		</Pagina>
 	)
 }
