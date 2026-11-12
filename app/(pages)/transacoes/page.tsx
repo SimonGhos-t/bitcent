@@ -101,6 +101,21 @@ export default function Transacoes() {
 					/>
 					<SegmentedControl
 						aria-label="Modo de exibição"
+						// Mesmo visual do seletor de categoria: fundo e borda de campo, mesma altura
+						styles={{
+							root: {
+								backgroundColor: 'var(--mantine-color-dark-9)',
+								border: '1px solid var(--mantine-color-dark-5)',
+								height: 36, // altura do campo (size sm)
+								padding: 3,
+								alignItems: 'stretch',
+							},
+							label: {
+								height: '100%',
+								display: 'flex',
+								alignItems: 'center',
+							},
+						}}
 						value={tipoExibicao}
 						onChange={(valor) => alterarTipoExibicao(valor as TipoExibicao)}
 						data={[
