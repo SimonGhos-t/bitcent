@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { Anchor, Group, Progress, Stack, Text, Title } from '@mantine/core'
+import { Icon, IconChartBar, IconFlame, IconHistory } from '@tabler/icons-react'
 import { ResumoMensal } from '../../logic/core/financas/ResumoMensal'
 import Transacao from '../../logic/core/financas/Transacao'
 import Dinheiro from '../../logic/utils/Dinheiro'
@@ -19,10 +20,12 @@ function Vazio(props: { children: string }) {
 	)
 }
 
-function CabecalhoCartao(props: { titulo: string; link?: boolean }) {
+function CabecalhoCartao(props: { titulo: string; icone: Icon; link?: boolean }) {
 	return (
-		<Group justify="space-between" align="baseline" mb="sm" px={props.link ? 'lg' : 0}>
-			<Title order={2} size="h5" c="bright">
+		<Group justify="space-between" align="center" mb="sm" px={props.link ? 'lg' : 0}>
+			{/* O ícone usa a mesma cor do texto do título (currentColor) */}
+			<Title order={2} size="h5" c="bright" className="flex items-center gap-2">
+				<props.icone size={20} stroke={1.8} aria-hidden />
 				{props.titulo}
 			</Title>
 			{props.link && (
@@ -43,7 +46,7 @@ export default function PainelMes(props: PainelMesProps) {
 		<>
 			<div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
 				<Cartao className="lg:col-span-3">
-					<CabecalhoCartao titulo="Gastos por categoria" />
+					<CabecalhoCartao titulo="Gastos por categoria" icone={IconChartBar} />
 					{gastosPorCategoria.length ? (
 						<Stack gap="md">
 							{gastosPorCategoria.map((item) => (
@@ -72,7 +75,7 @@ export default function PainelMes(props: PainelMesProps) {
 
 				<Cartao className="lg:col-span-2" px={0} pb="xs">
 					<div className="px-5">
-						<CabecalhoCartao titulo="Maiores gastos" />
+						<CabecalhoCartao titulo="Maiores gastos" icone={IconFlame} />
 					</div>
 					{maioresGastos.length ? (
 						maioresGastos.map((t, i) => (
@@ -93,7 +96,7 @@ export default function PainelMes(props: PainelMesProps) {
 			</div>
 
 			<Cartao px={0} pb="xs">
-				<CabecalhoCartao titulo="Últimas transações" link />
+				<CabecalhoCartao titulo="Últimas transações" icone={IconHistory} link />
 				{ultimas.length ? (
 					ultimas.map((t, i) => (
 						<LinhaTransacao
