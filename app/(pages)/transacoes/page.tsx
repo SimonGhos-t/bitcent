@@ -12,6 +12,7 @@ import useTransacao, { TipoExibicao } from '@/app/src/data/hooks/useTransacao'
 import { calcularResumo } from '@/app/src/logic/core/financas/ResumoMensal'
 import { TipoTransacao } from '@/app/src/logic/core/financas/TipoTransacao'
 import categorias from '@/app/src/data/constants/categorias'
+import useCelular from '@/app/src/data/hooks/useCelular'
 
 // Ignora maiúsculas e acentos na busca
 function normalizar(texto: string) {
@@ -30,6 +31,8 @@ export default function Transacoes() {
 		abrirEdicao,
 	} = useTransacao()
 	const [busca, setBusca] = useState('')
+	// No celular o filtro de categoria não abre o teclado: só tocar e escolher
+	const celular = useCelular()
 	const [tipo, setTipo] = useState<'todas' | TipoTransacao>('todas')
 	const [categoria, setCategoria] = useState<string | null>(null)
 
@@ -92,7 +95,7 @@ export default function Transacoes() {
 						aria-label="Categoria"
 						placeholder="Todas as categorias"
 						clearable
-						searchable
+						searchable={!celular}
 						className="flex-1 sm:flex-none"
 						w={{ sm: 210 }}
 						data={categorias.map((c) => c.nome)}

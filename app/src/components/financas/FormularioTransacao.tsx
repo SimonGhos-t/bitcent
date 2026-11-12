@@ -22,6 +22,7 @@ import Dinheiro from '../../logic/utils/Dinheiro'
 import Data from '../../logic/utils/Data'
 import useFormulario from '../../data/hooks/useFormulario'
 import useCategorias from '../../data/hooks/useCategorias'
+import useCelular from '../../data/hooks/useCelular'
 
 interface FormularioTransacaoProps {
 	transacao: Transacao
@@ -48,6 +49,8 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 		props.transacao,
 	)
 	const { categoriasPorNome, categoriasPorDescricao } = useCategorias()
+	// No celular os selects não abrem o teclado: só tocar e escolher
+	const celular = useCelular()
 	const [subcategoriaAberta, setSubcategoriaAberta] = useState(false)
 	const [cadastrarOutra, setCadastrarOutra] = useState(false)
 	const [confirmarExclusao, setConfirmarExclusao] = useState(false)
@@ -161,7 +164,7 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 						placeholder="Selecione"
 						leftSection={<IconCategory size={18} />}
 						data={categorias}
-						searchable
+						searchable={!celular}
 						nothingFoundMessage="Nenhuma categoria encontrada"
 						value={dados.categoria || null}
 						onChange={alterarCategoria}
@@ -171,7 +174,7 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 						placeholder={dados.categoria ? 'Selecione' : 'Escolha a categoria'}
 						leftSection={<IconCategoryPlus size={18} />}
 						data={subcategorias}
-						searchable
+						searchable={!celular}
 						nothingFoundMessage="Nenhuma subcategoria encontrada"
 						disabled={!dados.categoria}
 						value={dados.descricao || null}
