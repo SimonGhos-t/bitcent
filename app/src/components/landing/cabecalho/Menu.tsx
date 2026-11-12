@@ -15,9 +15,10 @@ export default function Menu() {
 			<MenuItem url="#vantagens" className="hidden sm:flex">
 				Vantagens
 			</MenuItem>
+			{/* Depoimentos ocultos por enquanto; o link volta junto com a seção
 			<MenuItem url="#depoimentos" className="hidden sm:flex">
 				Depoimentos
-			</MenuItem>
+			</MenuItem> */}
 			<MenuItem onClick={loginGoogle} className="bg-linear-to-r from-indigo-600 to-cyan-600">
 				<div className="flex items-center gap-2">
 					<IconBrandGoogle size={15} />

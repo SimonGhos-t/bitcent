@@ -11,7 +11,10 @@ export default function Landing() {
 			<Cabecalho />
 			<Destaque />
 			<Vantagens />
-			<Depoimentos />
+			{/* Depoimentos ocultos por enquanto (display: none); voltam depois */}
+			<div className="hidden">
+				<Depoimentos />
+			</div>
 			<Rodape />
 		</Pagina>
 	)
