@@ -3,8 +3,7 @@ import '@mantine/dates/styles.css'
 import '@mantine/core/styles.css'
 import { Nunito } from 'next/font/google'
 import './globals.css'
-import { MantineProvider } from '@mantine/core'
-import { AutenticacaoProvider } from './src/data/contexts/AutenticacaoContext'
+import Provedores from './src/components/template/Provedores'
 
 const fontNunito = Nunito({
 	subsets: ['latin'],
@@ -27,9 +26,7 @@ export default function RootLayout({
 			className={`${fontNunito.variable} ${fontNunito.className} h-full antialiased`}
 		>
 			<body className="min-h-full flex flex-col">
-				<MantineProvider forceColorScheme="dark">
-					<AutenticacaoProvider>{children}</AutenticacaoProvider>
-				</MantineProvider>
+				<Provedores>{children}</Provedores>
 			</body>
 		</html>
 	)

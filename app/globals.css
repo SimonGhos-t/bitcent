@@ -1,5 +1,19 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @theme inline {
-	--font-sans: var(--font-nunito), system-ui, sans-serif;
+  --font-sans: var(--font-nunito), system-ui, sans-serif;
+
+  /* Os cinzas "zinc" usados nas classes do Tailwind seguem a paleta preto + ciano
+     do tema do Mantine (app/src/theme.ts) */
+  --color-zinc-50: #f5f7fa;
+  --color-zinc-100: #f5f7fa;
+  --color-zinc-200: #d0d5de;
+  --color-zinc-300: #d0d5de;
+  --color-zinc-400: #aeb5c2;
+  --color-zinc-500: #8b93a3;
+  --color-zinc-600: #3a4252;
+  --color-zinc-700: #1c212b;
+  --color-zinc-800: #1c212b;
+  --color-zinc-900: #07080b;
+  --color-zinc-950: #040506;
 }

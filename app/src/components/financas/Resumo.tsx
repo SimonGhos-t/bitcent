@@ -59,12 +59,10 @@ export default function Resumo(props: ResumoProps) {
 					valor={guardado}
 					icone={<IconPigMoney />}
 					iconeClassName="text-blue-500"
-					valorClassName={
-						guardado > 0 ? 'text-green-400' : guardado === 0 ? 'text-red-400' : ''
-					}
+					valorClassName={guardado > 0 ? 'text-green-400' : ''}
 				/>
 				<ResumoItem
-					titulo="Total"
+					titulo="Saldo do mês"
 					valor={total}
 					icone={<IconArrowsDoubleNeSw />}
 					iconeClassName="text-white"
