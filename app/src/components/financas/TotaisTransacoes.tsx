@@ -68,7 +68,7 @@ export default function TotaisTransacoes(props: { totais: ResumoMensal }) {
 						nome="Guardado"
 						icone={IconPigMoney}
 						cor="blue"
-						sinal=""
+						sinal="+"
 						valor={t.guardado}
 					/>
 				)}
