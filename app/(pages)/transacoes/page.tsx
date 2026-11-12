@@ -1,8 +1,9 @@
 'use client'
-import { Button, Group, Paper, SegmentedControl, Select, Text, TextInput } from '@mantine/core'
+import { Button, Group, SegmentedControl, Select, TextInput } from '@mantine/core'
 import { IconLayoutGrid, IconList, IconPlus, IconSearch } from '@tabler/icons-react'
 import { useMemo, useState } from 'react'
 import Grade from '@/app/src/components/financas/Grade'
+import TotaisTransacoes from '@/app/src/components/financas/TotaisTransacoes'
 import Lista from '@/app/src/components/financas/Lista'
 import CampoMesAno from '@/app/src/components/template/CampoMesAno'
 import NaoEncontrado from '@/app/src/components/template/NaoEncontrado'
@@ -10,7 +11,6 @@ import PaginaInicial from '@/app/src/components/template/PaginaInicial'
 import useTransacao, { TipoExibicao } from '@/app/src/data/hooks/useTransacao'
 import { calcularResumo } from '@/app/src/logic/core/financas/ResumoMensal'
 import { TipoTransacao } from '@/app/src/logic/core/financas/TipoTransacao'
-import Dinheiro from '@/app/src/logic/utils/Dinheiro'
 import categorias from '@/app/src/data/constants/categorias'
 
 // Ignora maiúsculas e acentos na busca
@@ -111,37 +111,7 @@ export default function Transacoes() {
 				/>
 			</Group>
 
-			<Paper withBorder radius="md" px="md" py="sm" bg="dark.7">
-				<Group gap="xl" wrap="wrap" style={{ rowGap: 4 }}>
-					<Text>
-						Receitas{' '}
-						<Text span fw={700} c="green.4">
-							+{Dinheiro.formatar(totais.receitas)}
-						</Text>
-					</Text>
-					<Text>
-						Despesas{' '}
-						<Text span fw={700} c="red.4">
-							−{Dinheiro.formatar(totais.despesas)}
-						</Text>
-					</Text>
-					{totais.guardado > 0 && (
-						<Text>
-							Guardado{' '}
-							<Text span fw={700} c="blue.3">
-								{Dinheiro.formatar(totais.guardado)}
-							</Text>
-						</Text>
-					)}
-					<Text>
-						Saldo{' '}
-						<Text span fw={700} c={totais.saldo < 0 ? 'red.4' : 'green.4'}>
-							{totais.saldo < 0 ? '−' : '+'}
-							{Dinheiro.formatar(Math.abs(totais.saldo))}
-						</Text>
-					</Text>
-				</Group>
-			</Paper>
+			<TotaisTransacoes totais={totais} />
 
 			{filtradas.length ? (
 				tipoExibicao === 'grade' ? (
