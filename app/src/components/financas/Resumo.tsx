@@ -59,10 +59,21 @@ export default function Resumo(props: { resumo: ResumoMensal }) {
 					variant="light"
 					color="red"
 					icon={<IconAlertCircle size={20} />}
-					styles={{ message: { color: 'var(--mantine-color-red-1)' } }}
+					py="sm"
+					styles={{
+						message: { color: 'var(--mantine-color-red-1)' },
+						wrapper: { alignItems: 'center' },
+					}}
 				>
-					Você gastou <strong>{Dinheiro.formatar(Math.abs(r.saldo))} a mais</strong> do
-					que recebeu neste mês.
+					{/* Frase curta no celular, para caber em uma linha */}
+					<span className="sm:hidden text-[13px]">
+						Gastou <strong>{Dinheiro.formatar(Math.abs(r.saldo))} a mais</strong> do que
+						recebeu.
+					</span>
+					<span className="hidden sm:inline">
+						Você gastou <strong>{Dinheiro.formatar(Math.abs(r.saldo))} a mais</strong>{' '}
+						do que recebeu neste mês.
+					</span>
 				</Alert>
 			)}
 			<SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing={{ base: 'sm', sm: 'md' }}>
