@@ -126,7 +126,7 @@ Esforço: P = poucas horas, M = um ou dois dias, G = uma semana ou mais.
 
 ## Depois (sem versão definida)
 
-- [ ] Instalar no celular (PWA): ícone na tela inicial e abertura em tela cheia.
+- [x] Instalar no celular (PWA): ícone na tela inicial e abertura em tela cheia (feito junto com o logo novo, 12/11/2026).
 - [ ] Subcategorias próprias, criadas numa tela de configurações (não no formulário, para os filtros continuarem confiáveis).
 - [ ] Voltar a seção de Depoimentos na landing (hoje oculta com `hidden`) e o link no cabeçalho.
 

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import '@mantine/dates/styles.css'
 import '@mantine/core/styles.css'
 import { Nunito } from 'next/font/google'
@@ -12,7 +12,17 @@ const fontNunito = Nunito({
 
 export const metadata: Metadata = {
 	title: 'BitCent',
-	description: 'App de finanças',
+	description: 'Controle de gastos e registro de despesas',
+	applicationName: 'BitCent',
+	appleWebApp: {
+		capable: true,
+		title: 'BitCent',
+		statusBarStyle: 'black-translucent',
+	},
+}
+
+export const viewport: Viewport = {
+	themeColor: '#000000',
 }
 
 export default function RootLayout({
