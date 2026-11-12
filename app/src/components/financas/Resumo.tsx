@@ -65,7 +65,7 @@ export default function Resumo(props: { resumo: ResumoMensal }) {
 					que recebeu neste mês.
 				</Alert>
 			)}
-			<SimpleGrid cols={{ base: 2, lg: 4 }} spacing={{ base: 'sm', sm: 'md' }}>
+			<SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing={{ base: 'sm', sm: 'md' }}>
 				<Item
 					titulo="Receitas"
 					valor={Dinheiro.formatar(r.receitas)}

@@ -48,13 +48,13 @@ export default function Transacoes() {
 
 	return (
 		<PaginaInicial
+			mostrarMes
 			titulo="Transações"
 			subtitulo="Todos os lançamentos do mês, do mais recente ao mais antigo."
 			acoes={
 				<>
 					<CampoMesAno data={data} dataMudou={alterarData} />
 					<Button
-						visibleFrom="sm"
 						size="md"
 						leftSection={<IconPlus size={18} stroke={2.2} />}
 						onClick={abrirNova}

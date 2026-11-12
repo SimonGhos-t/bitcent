@@ -17,13 +17,13 @@ export default function Inicio() {
 
 	return (
 		<PaginaInicial
+			mostrarMes
 			titulo={`Resumo de ${mes}`}
 			subtitulo="Quanto entrou, quanto saiu e para onde foi."
 			acoes={
 				<>
 					<CampoMesAno data={data} dataMudou={alterarData} />
 					<Button
-						visibleFrom="sm"
 						size="md"
 						leftSection={<IconPlus size={18} stroke={2.2} />}
 						onClick={abrirNova}

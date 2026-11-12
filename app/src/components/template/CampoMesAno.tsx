@@ -10,12 +10,18 @@ import Data from '../../logic/utils/Data'
 export interface CampoMesAnoProps {
 	data: Date
 	dataMudou: (data: Date) => void
+	// Versão menor para o topo do celular ("Nov 2026", sem ícone)
+	compacto?: boolean
 }
 
 export default function CampoMesAno(props: CampoMesAnoProps) {
 	const [aberto, { toggle, close }] = useDisclosure(false)
 	const mes = dayjs(props.data).startOf('month')
-	const rotulo = Data.mmyy.formatar(mes.toDate()).replace(' de ', ' ')
+	const rotulo = props.compacto
+		? mes.toDate().toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '') +
+			` ${mes.year()}`
+		: Data.mmyy.formatar(mes.toDate()).replace(' de ', ' ')
+	const tamanho = props.compacto ? 32 : 36
 
 	return (
 		<Paper withBorder p={3} radius="md" bg="dark.7">
@@ -23,7 +29,7 @@ export default function CampoMesAno(props: CampoMesAnoProps) {
 				<ActionIcon
 					variant="subtle"
 					color="gray"
-					size={36}
+					size={tamanho}
 					aria-label="Mês anterior"
 					onClick={() => props.dataMudou(mes.subtract(1, 'month').toDate())}
 				>
@@ -35,8 +41,9 @@ export default function CampoMesAno(props: CampoMesAnoProps) {
 							variant="subtle"
 							color="gray"
 							c="bright"
-							h={36}
-							leftSection={<IconCalendar size={16} />}
+							h={tamanho}
+							leftSection={props.compacto ? undefined : <IconCalendar size={16} />}
+							px={props.compacto ? 'xs' : undefined}
 							onClick={toggle}
 							className="capitalize"
 						>
@@ -58,7 +65,7 @@ export default function CampoMesAno(props: CampoMesAnoProps) {
 				<ActionIcon
 					variant="subtle"
 					color="gray"
-					size={36}
+					size={tamanho}
 					aria-label="Próximo mês"
 					onClick={() => props.dataMudou(mes.add(1, 'month').toDate())}
 				>
