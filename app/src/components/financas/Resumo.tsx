@@ -27,11 +27,13 @@ interface ItemProps {
 function Item(props: ItemProps) {
 	return (
 		<Cartao p="md">
-			<Group justify="space-between" mb="xs">
-				<Text c="dark.2" fw={500} size="sm">
+			{/* Altura fixa: com ícone ou com selo (e título em até 2 linhas no celular),
+			    o valor fica na mesma linha em todos os cards */}
+			<Group justify="space-between" wrap="nowrap" gap="xs" h={34} mb="xs">
+				<Text c="dark.2" fw={500} size="sm" lh={1.2} lineClamp={2}>
 					{props.titulo}
 				</Text>
-				{props.destaque}
+				<div className="shrink-0">{props.destaque}</div>
 			</Group>
 			<Text fz={{ base: 20, sm: 26 }} fw={800} c={props.cor ?? 'bright'}>
 				{props.valor}
