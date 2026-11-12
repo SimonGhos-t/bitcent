@@ -1,6 +1,7 @@
 'use client'
 import { Badge, Button, Group, Paper, Text, Title } from '@mantine/core'
 import { ReactNode, useState } from 'react'
+import { IconDeviceFloppy } from '@tabler/icons-react'
 
 interface MiniFormularioProps {
 	titulo: string
@@ -58,7 +59,14 @@ export default function MiniFormulario(props: MiniFormularioProps) {
 					<Text size="sm" c="dimmed">
 						{props.msgRodape}
 					</Text>
-					<Button type="submit" disabled={!props.podeSalvar} loading={salvando}>
+					<Button
+						type="submit"
+						ml="auto"
+						color="green.9"
+						leftSection={<IconDeviceFloppy size={18} />}
+						disabled={!props.podeSalvar}
+						loading={salvando}
+					>
 						Salvar
 					</Button>
 				</Group>

@@ -13,7 +13,13 @@ import {
 	TextInput,
 } from '@mantine/core'
 import { DatePickerInput } from '@mantine/dates'
-import { IconCalendarWeek, IconCategory, IconCategoryPlus, IconTrash } from '@tabler/icons-react'
+import {
+	IconCalendarWeek,
+	IconCategory,
+	IconCategoryPlus,
+	IconDeviceFloppy,
+	IconTrash,
+} from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import { useRef, useState } from 'react'
 import Transacao, { transacaoValida } from '../../logic/core/financas/Transacao'
@@ -244,11 +250,18 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 						Excluir
 					</Button>
 				)}
-				<Group gap="xs">
+				{/* ml="auto": quando quebra a linha no celular, os botões continuam à direita */}
+				<Group gap="xs" ml="auto">
 					<Button variant="subtle" color="gray" onClick={props.fechar}>
 						Cancelar
 					</Button>
-					<Button type="submit" loading={salvando} disabled={!transacaoValida(dados)}>
+					<Button
+						type="submit"
+						color="green.9"
+						leftSection={<IconDeviceFloppy size={18} />}
+						loading={salvando}
+						disabled={!transacaoValida(dados)}
+					>
 						{props.modo === 'nova' ? textoSalvar[dados.tipo] : 'Salvar alterações'}
 					</Button>
 				</Group>
