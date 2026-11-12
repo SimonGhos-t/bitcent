@@ -1,23 +1,17 @@
 'use client'
-import { Button, Modal } from '@mantine/core'
-import { IconCashBanknotePlus, IconClipboardList, IconEdit } from '@tabler/icons-react'
+import { Button } from '@mantine/core'
+import { IconCashBanknotePlus } from '@tabler/icons-react'
+import { useDisclosure } from '@mantine/hooks'
 import useTransacao from '../../src/data/hooks/useTransacao'
 import CampoMesAno from '../../src/components/template/CampoMesAno'
 import Resumo from '../../src/components/financas/Resumo'
 import PaginaInicial from '@/app/src/components/template/PaginaInicial'
-import { criarTransacaoVazia } from '@/app/src/logic/core/financas/Transacao'
-import { useDisclosure } from '@mantine/hooks'
-import NovaTransacao from '../../src/components/financas/NovaTransacao'
-import EditarTransacao from '@/app/src/components/financas/EditarTransacao'
-import TituloFormulario from '@/app/src/components/template/TituloFormulario'
+import ModalTransacao from '@/app/src/components/financas/ModalTransacao'
 
 export default function Inicio() {
 	const { data, alterarData, transacoes, transacaoSelecionada, selecionar, salvar, excluir } =
 		useTransacao()
-	const [novaTransacaoAberta, { open: novaTransacao, close: fecharTransacao }] =
-		useDisclosure(false)
-	const [editarTransacaoAberta, { open: editarTransacao, close: fecharEdicao }] =
-		useDisclosure(false)
+	const [modalAberto, { open: abrirModal, close: fecharModal }] = useDisclosure(false)
 
 	return (
 		<PaginaInicial>
@@ -26,50 +20,23 @@ export default function Inicio() {
 				<Button
 					leftSection={<IconCashBanknotePlus />}
 					onClick={() => {
-						;(selecionar(criarTransacaoVazia()), novaTransacao())
+						selecionar(null)
+						abrirModal()
 					}}
 					className="mb-2 min-h-10"
-					variant="gradient"
-					gradient={{ from: 'blue', to: 'cyan', deg: 90 }}
 					size="md"
 				>
-					Nova Transação
+					Nova transação
 				</Button>
 				<CampoMesAno data={data} dataMudou={alterarData} />
 			</div>
-			<Modal
-				opened={novaTransacaoAberta}
-				onClose={fecharTransacao}
-				centered
-				size={'lg'}
-				title={
-					<TituloFormulario
-						icone={<IconClipboardList />}
-						titulo="Cadastrar nova transação"
-					/>
-				}
-			>
-				<NovaTransacao
-					transacao={criarTransacaoVazia()}
-					salvar={salvar}
-					excluir={excluir}
-					fechar={fecharTransacao}
-				/>
-			</Modal>
-			<Modal
-				opened={editarTransacaoAberta}
-				onClose={fecharEdicao}
-				centered
-				size={'lg'}
-				title={<TituloFormulario icone={<IconEdit />} titulo="Editar transação" />}
-			>
-				<EditarTransacao
-					transacao={transacaoSelecionada ?? criarTransacaoVazia()}
-					excluir={excluir}
-					salvar={salvar}
-					fechar={fecharEdicao}
-				/>
-			</Modal>
+			<ModalTransacao
+				aberto={modalAberto}
+				fechar={fecharModal}
+				transacao={transacaoSelecionada}
+				salvar={salvar}
+				excluir={excluir}
+			/>
 		</PaginaInicial>
 	)
 }

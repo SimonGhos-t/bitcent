@@ -9,6 +9,14 @@ export default class Dinheiro {
 		})
 	}
 
+	// Sem o "R$" (para campos que já mostram o símbolo ao lado)
+	static formatarNumero(num: number): string {
+		return (num ?? 0).toLocaleString(Dinheiro._lingua, {
+			minimumFractionDigits: 2,
+			maximumFractionDigits: 2,
+		})
+	}
+
 	static desformatar(valor: string): number {
 		// Máscara de centavos: os dígitos digitados são lidos da direita para a esquerda
 		const numeros = (valor ?? '').replace(/[^0-9]+/g, '')

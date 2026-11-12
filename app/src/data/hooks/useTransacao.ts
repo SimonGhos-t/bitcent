@@ -27,14 +27,12 @@ export default function useTransacao() {
 	async function salvar(transacao: Transacao) {
 		if (!usuario) return
 		await servicos.transacao.salvar(transacao, usuario)
-		setTransacao(null)
 		await buscarTransacoes()
 	}
 
 	async function excluir(transacao: Transacao) {
 		if (!usuario) return
 		await servicos.transacao.excluir(transacao, usuario)
-		setTransacao(null)
 		await buscarTransacoes()
 	}
 

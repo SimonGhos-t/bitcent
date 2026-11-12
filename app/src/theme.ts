@@ -33,6 +33,7 @@ export const tema = createTheme({
 					border: '1px solid var(--mantine-color-dark-5)',
 				},
 				header: { backgroundColor: 'var(--mantine-color-dark-7)' },
+				title: { fontWeight: 700 },
 			},
 		},
 		Input: {
