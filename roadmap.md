@@ -5,8 +5,8 @@ Cada versão é publicada sozinha: commits por etapa e build conferido antes de 
 
 | Versão | Tema | Principais entregas |
 | --- | --- | --- |
-| v2.1 (próxima) | Base e segurança | Regras do Firestore, limpar CPF/telefone, gravação em lote, lint e testes |
-| v2.2 | Contas fixas | Cadastro das contas, lançamento automático, previstas e confirmar, card "Contas do mês" |
+| v2.1 (pronta) | Base e segurança | Regras do Firestore, limpar CPF/telefone, gravação em lote, lint e testes |
+| v2.2 (próxima) | Contas fixas | Cadastro das contas, lançamento automático, previstas e confirmar, card "Contas do mês" |
 | v2.3 | Compras parceladas | Opção "Parcelado", parcelas geradas em lote, selo 3/10 nas listas, card "Parcelas futuras" |
 | v2.4 | Painel e metas | Comparação mensal, limite por categoria, evolução em 6 meses, metas e exportar CSV |
 
@@ -14,13 +14,13 @@ Cada versão é publicada sozinha: commits por etapa e build conferido antes de 
 
 ## v2.1 — Base e segurança
 
-- [ ] **Regras do Firestore**: garantir que só o dono lê e grava `usuarios/{email}` e `financas/{email}/...`
+- [x] **Regras do Firestore**: garantir que só o dono lê e grava `usuarios/{email}` e `financas/{email}/...`
       (ex.: `request.auth.token.email == email`).
-- [ ] **Limpar CPF e telefone do banco**: apagar os campos `cpf` e `telefone`, que a tela não usa mais.
-- [ ] **Gravação e exclusão em lote** em `Colecao` (`writeBatch`), para criar ou apagar várias transações de uma vez.
-- [ ] **Ids fixos** para lançamentos gerados (`{recorrenciaId}_{AAAA-MM}`, `{compraId}_{n}`), para nunca duplicar.
-- [ ] **Testes** das funções de cálculo: `Dinheiro`, `ResumoMensal`, divisão de parcelas, último dia do mês.
-- [ ] **Corrigir a configuração do lint**: `npm run lint` hoje para com erro de configuração
+- [x] **Limpar CPF e telefone do banco**: apagar os campos `cpf` e `telefone`, que a tela não usa mais.
+- [x] **Gravação e exclusão em lote** em `Colecao` (`writeBatch`), para criar ou apagar várias transações de uma vez.
+- [x] **Ids fixos** para lançamentos gerados (`{recorrenciaId}_{AAAA-MM}`, `{compraId}_{n}`), para nunca duplicar.
+- [x] **Testes** das funções de cálculo: `Dinheiro`, `ResumoMensal`, divisão de parcelas, último dia do mês.
+- [x] **Corrigir a configuração do lint**: `npm run lint` hoje para com erro de configuração
       (`'@typescript-eslint/no-explicit-any': ''` em `eslint.config.mjs`).
 
 ## v2.2 — Contas fixas (transações recorrentes)
