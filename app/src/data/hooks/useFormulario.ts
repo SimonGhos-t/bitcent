@@ -4,7 +4,7 @@ import { useState } from 'react'
 export default function useFormulario<T = any>(dadosIniciais?: T) {
 	const [dados, setDados] = useState<T>(dadosIniciais ?? ({} as T))
 
-	function alterarAtributo(atributo: string, fn?: Function) {
+	function alterarAtributo(atributo: string, fn?: (valor: any) => any) {
 		return (valorOuEvento: any) => {
 			let valor = valorOuEvento?.target?.value ?? valorOuEvento
 

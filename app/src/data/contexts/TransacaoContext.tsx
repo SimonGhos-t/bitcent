@@ -1,6 +1,6 @@
 'use client'
 import { createContext, ReactNode, useCallback, useContext, useEffect, useState } from 'react'
-import { useDisclosure } from '@mantine/hooks'
+import { useDisclosure, useLocalStorage } from '@mantine/hooks'
 import Transacao from '../../logic/core/financas/Transacao'
 import servicos from '../../logic/core'
 import AutenticacaoContext from './AutenticacaoContext'
@@ -30,18 +30,18 @@ const CHAVE_EXIBICAO = 'bitcent:exibicao'
 export function TransacaoProvider(props: { children: ReactNode }) {
 	const { usuario } = useContext(AutenticacaoContext)
 	const [data, setData] = useState<Date>(new Date())
-	const [tipoExibicao, setTipoExibicao] = useState<TipoExibicao>('lista')
+	// Valor salvo como texto puro ('lista' | 'grade'), igual à versão anterior
+	const [tipoExibicao, setTipoExibicao] = useLocalStorage<TipoExibicao>({
+		key: CHAVE_EXIBICAO,
+		defaultValue: 'lista',
+		getInitialValueInEffect: true,
+		serialize: (valor) => valor,
+		deserialize: (valor) => (valor === 'grade' ? 'grade' : 'lista'),
+	})
 	const [transacoes, setTransacoes] = useState<Transacao[]>([])
 	const [carregando, setCarregando] = useState(true)
 	const [selecionada, setSelecionada] = useState<Transacao | null>(null)
 	const [modalAberto, { open: abrirModal, close: fecharModal }] = useDisclosure(false)
-
-	useEffect(() => {
-		try {
-			const salvo = localStorage.getItem(CHAVE_EXIBICAO)
-			if (salvo === 'lista' || salvo === 'grade') setTipoExibicao(salvo)
-		} catch {}
-	}, [])
 
 	const buscarTransacoes = useCallback(async () => {
 		if (!usuario) return
@@ -50,9 +50,20 @@ export function TransacaoProvider(props: { children: ReactNode }) {
 		setCarregando(false)
 	}, [usuario, data])
 
+	// Busca ao trocar de usuário ou de mês. O "ativo" descarta a resposta
+	// de um mês antigo que chegue depois da do mês atual.
 	useEffect(() => {
-		buscarTransacoes()
-	}, [buscarTransacoes])
+		if (!usuario) return
+		let ativo = true
+		servicos.transacao.consultarPorMes(usuario, data).then((resultado) => {
+			if (!ativo) return
+			setTransacoes(resultado ?? [])
+			setCarregando(false)
+		})
+		return () => {
+			ativo = false
+		}
+	}, [usuario, data])
 
 	async function salvar(transacao: Transacao) {
 		if (!usuario) return
@@ -66,13 +77,6 @@ export function TransacaoProvider(props: { children: ReactNode }) {
 		await buscarTransacoes()
 	}
 
-	function alterarTipoExibicao(tipo: TipoExibicao) {
-		setTipoExibicao(tipo)
-		try {
-			localStorage.setItem(CHAVE_EXIBICAO, tipo)
-		} catch {}
-	}
-
 	return (
 		<TransacaoContext.Provider
 			value={{
@@ -81,7 +85,7 @@ export function TransacaoProvider(props: { children: ReactNode }) {
 				carregando,
 				tipoExibicao,
 				alterarData: setData,
-				alterarTipoExibicao,
+				alterarTipoExibicao: setTipoExibicao,
 				salvar,
 				excluir,
 				abrirNova: () => {
