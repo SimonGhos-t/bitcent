@@ -5,9 +5,9 @@ Cada versão é publicada sozinha: commits por etapa e build conferido antes de 
 
 | Versão | Tema | Principais entregas |
 | --- | --- | --- |
-| v2.1 (pronta) | Base e segurança | Regras do Firestore, limpar CPF/telefone, gravação em lote, lint e testes |
-| v2.2 (próxima) | Contas fixas | Cadastro das contas, lançamento automático, previstas e confirmar, card "Contas do mês" |
-| v2.3 | Compras parceladas | Opção "Parcelado", parcelas geradas em lote, selo 3/10 nas listas, card "Parcelas futuras" |
+| v2.1 (publicada) | Base e segurança | Regras do Firestore, limpar CPF/telefone, gravação em lote, lint e testes |
+| v2.2 (pronta) | Contas fixas | Cadastro das contas, lançamento automático, previstas e confirmar, card "Contas do mês" |
+| v2.3 (próxima) | Compras parceladas | Opção "Parcelado", parcelas geradas em lote, selo 3/10 nas listas, card "Parcelas futuras" |
 | v2.4 | Painel e metas | Comparação mensal, limite por categoria, evolução em 6 meses, metas e exportar CSV |
 
 ---
@@ -51,14 +51,17 @@ Cada transação gerada ganha `recorrenciaId` e `situacao` (`prevista` | `confir
 2. Para cada uma sem lançamento no mês, criar a transação com id `{recorrenciaId}_{AAAA-MM}`
    (evita duplicar se dois aparelhos abrirem o mês ao mesmo tempo).
 3. Valor fixo → `confirmada`; valor variável → `prevista`, com o valor padrão.
-4. Meses futuros não são gravados: aparecem só como projeção.
+4. Meses futuros não são gravados: aparecem só como projeção (card "Contas do mês" no Início).
+5. Excluir "só este mês" guarda o mês em `mesesPulados` na recorrência, para o lançamento não voltar.
+6. Editar pela tela Contas fixas: se o lançamento do mês atual já existe, ele fica como está e a
+   mudança vale do próximo mês em diante.
 
 ### Telas
 
-- [ ] Formulário: opção "Repetir todo mês", com o dia e a opção de valor variável.
-- [ ] Lista de transações: ícone de repetição nas recorrentes; previstas com estilo apagado e botão "Confirmar valor".
-- [ ] Lista de contas fixas (valor, dia, pausar) — em Meus Dados ou num item novo do menu.
-- [ ] Início: card "Contas do mês" (lançadas × a confirmar).
+- [x] Formulário: opção "Repetir todo mês", com o dia e a opção de valor variável.
+- [x] Lista de transações: ícone de repetição nas recorrentes; previstas com estilo apagado e botão "Confirmar valor".
+- [x] Lista de contas fixas (valor, dia, pausar) — num item novo do menu, "Contas fixas".
+- [x] Início: card "Contas do mês" (lançadas × a confirmar).
 
 ### Editar e excluir
 
@@ -132,9 +135,11 @@ Esforço: P = poucas horas, M = um ou dois dias, G = uma semana ou mais.
 
 ## Decisões em aberto
 
-- [ ] Contas fixas: ficam em Meus Dados ou num item novo do menu ("Contas fixas")?
-- [ ] Contas de valor variável: entram no saldo do mês como previstas, ou só depois de confirmadas?
+- [x] Contas fixas: ficam em Meus Dados ou num item novo do menu ("Contas fixas")?
+      **Decidido:** item novo no menu.
+- [x] Contas de valor variável: entram no saldo do mês como previstas, ou só depois de confirmadas?
+      **Decidido:** só depois de confirmadas (as previstas ficam fora de todos os totais).
 - [ ] Compras parceladas: a data das parcelas segue a data da compra ou o vencimento da fatura do cartão?
 - [ ] Receitas também podem ser recorrentes (ex.: salário todo dia 5) e parceladas (ex.: venda em 3x)?
       A proposta acima já permite os dois.
-- [ ] Começar pelas contas fixas (v2.2) ou pelas compras parceladas (v2.3)?
+- [x] Começar pelas contas fixas (v2.2) ou pelas compras parceladas (v2.3)? **Decidido:** contas fixas.
