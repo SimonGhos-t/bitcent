@@ -1,0 +1,32 @@
+rules_version = '2';
+
+// Regras do BitCent
+// Cada usuário só lê e grava os próprios documentos, identificados pelo e-mail da conta Google:
+//   usuarios/{email}            dados do perfil (nome, e-mail, foto)
+//   financas/{email}/...        transações e tudo o que vier depois (recorrências, compras...)
+// Qualquer outro caminho fica bloqueado.
+//
+// Publicar: firebase deploy --only firestore:rules
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function ehDono(email) {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.email == email;
+    }
+
+    match /usuarios/{email} {
+      allow read, delete: if ehDono(email);
+
+      // Só os campos usados pela tela (CPF e telefone não voltam para o banco)
+      allow create, update: if ehDono(email)
+        && request.resource.data.keys().hasOnly(['id', 'nome', 'email', 'imagemUrl'])
+        && request.resource.data.email == email;
+    }
+
+    match /financas/{email}/{documento=**} {
+      allow read, write: if ehDono(email);
+    }
+  }
+}
