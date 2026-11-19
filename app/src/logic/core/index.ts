@@ -1,3 +1,4 @@
+import ServicosParcelas from './financas/ServicosParcelas'
 import ServicosRecorrencia from './financas/ServicosRecorrencia'
 import ServicosTransacao from './financas/ServicosTransacao'
 import ServicosUsuario from './usuario/ServicosUsuario'
@@ -5,6 +6,9 @@ import ServicosUsuario from './usuario/ServicosUsuario'
 class Serviços {
 	get transacao() {
 		return new ServicosTransacao()
+	}
+	get parcelas() {
+		return new ServicosParcelas()
 	}
 	get recorrencia() {
 		return new ServicosRecorrencia()

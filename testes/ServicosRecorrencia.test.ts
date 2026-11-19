@@ -6,48 +6,7 @@ import Transacao from '../app/src/logic/core/financas/Transacao'
 import { TipoTransacao } from '../app/src/logic/core/financas/TipoTransacao'
 import Usuario from '../app/src/logic/core/usuario/Usuario'
 import Data from '../app/src/logic/utils/Data'
-
-// Banco em memória com a mesma interface da Colecao (só o que os serviços usam)
-class ColecaoFalsa {
-	docs = new Map<string, Map<string, any>>()
-	private _c(caminho: string) {
-		if (!this.docs.has(caminho)) this.docs.set(caminho, new Map())
-		return this.docs.get(caminho)!
-	}
-	async salvar(caminho: string, e: any, id?: string) {
-		const idFinal = id ?? e.id ?? `gerado-${this._c(caminho).size + 1}`
-		const limpo = Object.fromEntries(Object.entries(e).filter(([, v]) => v !== undefined))
-		this._c(caminho).set(idFinal, { ...limpo, id: idFinal })
-		return { ...e, id: idFinal }
-	}
-	async salvarVarios(caminho: string, es: any[]) {
-		return Promise.all(es.map((e) => this.salvar(caminho, e)))
-	}
-	async excluir(caminho: string, id?: string) {
-		return !!id && this._c(caminho).delete(id)
-	}
-	async excluirVarios(caminho: string, ids: string[]) {
-		ids.forEach((id) => this._c(caminho).delete(id))
-		return ids.length
-	}
-	async consultar(caminho: string) {
-		return [...this._c(caminho).values()]
-	}
-	async consultarPorId(caminho: string, id: string) {
-		return this._c(caminho).get(id) ?? null
-	}
-	async consultarComFiltros(caminho: string, filtros: any[]) {
-		return [...this._c(caminho).values()].filter((d) =>
-			filtros.every((f) =>
-				f.op === '=='
-					? d[f.atributo] === f.valor
-					: f.op === '>='
-						? d[f.atributo] >= f.valor
-						: d[f.atributo] <= f.valor,
-			),
-		)
-	}
-}
+import ColecaoFalsa from './apoio/ColecaoFalsa'
 
 const usuario: Usuario = { id: 'u', nome: 'Teste', email: 't@t.com', imagemUrl: null }
 const T = 'financas/t@t.com/transacoes'
@@ -92,8 +51,7 @@ async function abrirMes(n: number) {
 	return [...doMes, ...criadas] as Transacao[]
 }
 
-// Ids gravados numa coleção, em ordem
-const ids = (caminho: string) => [...(banco.docs.get(caminho)?.keys() ?? [])].sort()
+const ids = (caminho: string) => banco.ids(caminho)
 
 describe('ServicosRecorrencia (banco em memória)', () => {
 	beforeEach(criarServico)
