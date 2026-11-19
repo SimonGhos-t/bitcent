@@ -6,9 +6,9 @@ Cada versão é publicada sozinha: commits por etapa e build conferido antes de 
 | Versão | Tema | Principais entregas |
 | --- | --- | --- |
 | v2.1 (publicada) | Base e segurança | Regras do Firestore, limpar CPF/telefone, gravação em lote, lint e testes |
-| v2.2 (pronta) | Contas fixas | Cadastro das contas, lançamento automático, previstas e confirmar, card "Contas do mês" |
-| v2.3 (próxima) | Compras parceladas | Opção "Parcelado", parcelas geradas em lote, selo 3/10 nas listas, card "Parcelas futuras" |
-| v2.4 | Painel e metas | Comparação mensal, limite por categoria, evolução em 6 meses, metas e exportar CSV |
+| v2.2 (publicada) | Contas fixas | Cadastro das contas, lançamento automático, previstas e confirmar, card "Contas do mês" |
+| v2.3 (pronta) | Compras parceladas | Opção "Parcelado", parcelas geradas em lote, selo 3/10 nas listas, card "Parcelas futuras" |
+| v2.4 (próxima) | Painel e metas | Comparação mensal, limite por categoria, evolução em 6 meses, metas e exportar CSV |
 
 ---
 
@@ -89,31 +89,35 @@ As parcelas são transações normais com campos a mais (substituem o campo `par
 | `compraId` | id da compra | Liga todas as parcelas da mesma compra |
 | `parcela` | 3 | Número desta parcela |
 | `totalParcelas` | 10 | Quantas parcelas a compra tem |
-| `valorTotal` | 3000 | Valor da compra inteira |
+
+O valor de cada transação é o valor da parcela; o total da compra é parcela × quantidade
+(não há campo `valorTotal`).
 
 ### Criação das parcelas
 
-1. No formulário, "Parcelado" mostra o número de parcelas (2 a 48) e se o valor digitado é o **total**
-   ou o **de cada parcela**.
+1. No formulário, "Como lançar" → "Parcelado": digita o **valor da parcela** e o número de parcelas
+   (2 a 48); o app mostra o total e o período. (Parcelado quase sempre custa mais que à vista, então
+   vale o que aparece na fatura ou no carnê.)
 2. Ao salvar, gravar todas as parcelas num `writeBatch` (todas ou nenhuma), com ids `{compraId}_{n}`.
 3. 1ª parcela na data escolhida; as seguintes no mesmo dia dos meses seguintes (dia 31 → último dia do mês).
-4. Centavos: R$ 100 em 3x = 33,33 + 33,33 + 33,34 (a diferença vai para a última parcela).
+4. As parcelas entram no saldo do mês em que caem, como qualquer transação.
 
 ### Telas
 
-- [ ] Lista e cards: "Notebook (3/10)" e selo com o número da parcela.
-- [ ] Início: card "Parcelas dos próximos meses", com o valor já comprometido por mês.
+- [x] Lista e cards: "Notebook (3/10)" e selo com o número da parcela.
+- [x] Início: card "Parcelas dos próximos meses", com o valor já comprometido por mês.
 
 ### Editar e excluir
 
-Perguntar **só esta parcela** ou **esta e as próximas**. Mudar o valor ou o número de parcelas recria
-as parcelas que ainda não venceram; as vencidas ficam como estão.
+Perguntar **só esta parcela** ou **esta e as próximas** (ao excluir, também **a compra inteira**).
+Em "esta e as próximas", o valor novo vale da parcela atual em diante; aumentar o número de parcelas
+acrescenta parcelas no fim e diminuir apaga as últimas. As anteriores não mudam (só o total do selo).
 
 ### Casos especiais
 
-- Compra lançada depois de algumas parcelas pagas: opção "começar da parcela N".
-- Excluir a compra inteira pede confirmação mostrando quantas parcelas serão apagadas.
-- Data da fatura do cartão fica fora da primeira versão (ver Decisões em aberto).
+- [x] Compra lançada depois de algumas parcelas pagas: "Já paguei algumas parcelas" (começa da parcela N).
+- [x] Excluir pede confirmação mostrando quantas parcelas (e quanto) serão apagadas.
+- Data da fatura do cartão fica fora desta versão (decidido: parcelas na data da compra).
 
 ## v2.4 — Painel e metas
 
@@ -139,7 +143,8 @@ Esforço: P = poucas horas, M = um ou dois dias, G = uma semana ou mais.
       **Decidido:** item novo no menu.
 - [x] Contas de valor variável: entram no saldo do mês como previstas, ou só depois de confirmadas?
       **Decidido:** só depois de confirmadas (as previstas ficam fora de todos os totais).
-- [ ] Compras parceladas: a data das parcelas segue a data da compra ou o vencimento da fatura do cartão?
-- [ ] Receitas também podem ser recorrentes (ex.: salário todo dia 5) e parceladas (ex.: venda em 3x)?
-      A proposta acima já permite os dois.
+- [x] Compras parceladas: a data das parcelas segue a data da compra ou o vencimento da fatura do cartão?
+      **Decidido:** data da compra.
+- [x] Receitas também podem ser recorrentes (ex.: salário todo dia 5) e parceladas (ex.: venda em 3x)?
+      **Decidido:** sim, as duas.
 - [x] Começar pelas contas fixas (v2.2) ou pelas compras parceladas (v2.3)? **Decidido:** contas fixas.
