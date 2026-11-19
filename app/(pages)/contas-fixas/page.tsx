@@ -241,19 +241,14 @@ export default function ContasFixas() {
 				<Button
 					size="md"
 					leftSection={<IconPlus size={18} stroke={2.2} />}
-					onClick={() => abrirNova({ repetir: true })}
+					onClick={() => abrirNova({ comoLancar: 'mensal' })}
 				>
 					Nova conta fixa
 				</Button>
 			}
 		>
 			{aviso && (
-				<Text
-					size="sm"
-					c="cyan.3"
-					role="status"
-					className="flex items-center gap-2"
-				>
+				<Text size="sm" c="cyan.3" role="status" className="flex items-center gap-2">
 					<IconInfoCircle size={16} aria-hidden />
 					{aviso}
 				</Text>
@@ -264,12 +259,12 @@ export default function ContasFixas() {
 					<Stack align="center" gap="md">
 						<NaoEncontrado>Nenhuma conta fixa ainda</NaoEncontrado>
 						<Text c="dimmed" ta="center" maw={420}>
-							Aluguel, internet, salário… Cadastre uma vez e o BitCent lança
-							sozinho todo mês.
+							Aluguel, internet, salário… Cadastre uma vez e o BitCent lança sozinho
+							todo mês.
 						</Text>
 						<Button
 							leftSection={<IconPlus size={18} />}
-							onClick={() => abrirNova({ repetir: true })}
+							onClick={() => abrirNova({ comoLancar: 'mensal' })}
 						>
 							Nova conta fixa
 						</Button>
@@ -348,7 +343,11 @@ export default function ContasFixas() {
 					)}
 
 					<Text size="sm" c="dimmed" className="flex items-start gap-2">
-						<IconInfoCircle size={16} style={{ flexShrink: 0, marginTop: 2 }} aria-hidden />
+						<IconInfoCircle
+							size={16}
+							style={{ flexShrink: 0, marginTop: 2 }}
+							aria-hidden
+						/>
 						<span>
 							Pausar ou excluir uma conta fixa não apaga os lançamentos que já foram
 							confirmados.
@@ -388,8 +387,8 @@ export default function ContasFixas() {
 					<Text span c="bright" fw={700}>
 						{excluindo?.descricao} · {Dinheiro.formatar(excluindo?.valor ?? 0)}
 					</Text>{' '}
-					deixa de ser lançada. Os lançamentos já confirmados ficam no histórico; os
-					que ainda estão a confirmar são apagados.
+					deixa de ser lançada. Os lançamentos já confirmados ficam no histórico; os que
+					ainda estão a confirmar são apagados.
 				</Text>
 				<Group justify="flex-end" mt="lg">
 					<Button variant="subtle" color="gray" onClick={() => setExcluindo(null)}>

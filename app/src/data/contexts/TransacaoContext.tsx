@@ -8,6 +8,7 @@ import Recorrencia, {
 	mesFuturo,
 } from '../../logic/core/financas/Recorrencia'
 import { Escopo, OpcoesRepetir } from '../../logic/core/financas/ServicosRecorrencia'
+import { EscopoParcela, OpcoesParcelar } from '../../logic/core/financas/ServicosParcelas'
 import Usuario from '../../logic/core/usuario/Usuario'
 import servicos from '../../logic/core'
 import AutenticacaoContext from './AutenticacaoContext'
@@ -16,16 +17,23 @@ import ModalConfirmarValor from '../../components/financas/ModalConfirmarValor'
 
 export type TipoExibicao = 'lista' | 'grade'
 
+export type ComoLancar = 'uma' | 'mensal' | 'parcelado'
+
 export interface OpcoesSalvar {
-	// Lançamento novo com "Repetir todo mês"
+	// Lançamento novo "Todo mês" (conta fixa)
 	repetir?: OpcoesRepetir
-	// Lançamento de conta fixa: só este mês ou este e os próximos
-	escopo?: Escopo
+	// Lançamento novo "Parcelado"
+	parcelar?: OpcoesParcelar
+	// Conta fixa: só este mês ou este e os próximos.
+	// Parcela: só esta, esta e as próximas (ou "todas", ao excluir)
+	escopo?: EscopoParcela
+	// Parcela: nova quantidade de parcelas da compra
+	totalParcelas?: number
 }
 
 export interface OpcoesNova {
-	// Abre o formulário com "Repetir todo mês" já ligado
-	repetir?: boolean
+	// Abre o formulário já em "Todo mês" ou "Parcelado"
+	comoLancar?: ComoLancar
 }
 
 interface TransacaoContextProps {
@@ -35,12 +43,15 @@ interface TransacaoContextProps {
 	recorrencias: Recorrencia[]
 	// Meses futuros: lançamentos das contas fixas que ainda não foram gravados
 	projecoes: Transacao[]
+	// Transações com data depois do mês escolhido (para o card de parcelas)
+	futuras: Transacao[]
 	carregando: boolean
 	tipoExibicao: TipoExibicao
 	alterarData: (data: Date) => void
 	alterarTipoExibicao: (tipo: TipoExibicao) => void
 	salvar: (transacao: Transacao, opcoes?: OpcoesSalvar) => Promise<void>
-	excluir: (transacao: Transacao, escopo?: Escopo) => Promise<void>
+	excluir: (transacao: Transacao, escopo?: EscopoParcela) => Promise<void>
+	consultarCompra: (parcela: Transacao) => Promise<Transacao[]>
 	confirmarValor: (transacao: Transacao, valor: number, data: Date) => Promise<void>
 	editarRecorrencia: (r: Recorrencia, mudancas: Partial<Recorrencia>) => Promise<string>
 	alterarAtiva: (r: Recorrencia, ativa: boolean) => Promise<void>
@@ -57,13 +68,19 @@ const CHAVE_EXIBICAO = 'bitcent:exibicao'
 interface DadosDoMes {
 	transacoes: Transacao[]
 	recorrencias: Recorrencia[]
+	futuras: Transacao[]
 }
 
-// Busca o mês e as contas fixas e grava os lançamentos que faltam no mês
+// Busca o mês, as contas fixas e o que vence depois do mês, e grava os lançamentos
+// das contas fixas que faltam no mês
 async function carregarMes(usuario: Usuario, data: Date): Promise<DadosDoMes> {
-	const [doMes, recorrencias] = await Promise.all([
+	const [doMes, recorrencias, futuras] = await Promise.all([
 		servicos.transacao.consultarPorMes(usuario, data),
 		servicos.recorrencia.consultar(usuario),
+		servicos.parcelas.consultarDepoisDoMes(usuario, data).catch((erro) => {
+			console.warn('Não foi possível buscar as parcelas futuras', erro)
+			return [] as Transacao[]
+		}),
 	])
 	const transacoes = doMes ?? []
 	try {
@@ -73,11 +90,11 @@ async function carregarMes(usuario: Usuario, data: Date): Promise<DadosDoMes> {
 			recorrencias,
 			transacoes,
 		)
-		return { transacoes: [...transacoes, ...criadas], recorrencias }
+		return { transacoes: [...transacoes, ...criadas], recorrencias, futuras }
 	} catch (erro) {
 		// Sem os lançamentos automáticos o mês ainda abre; tenta de novo na próxima vez
 		console.warn('Não foi possível lançar as contas fixas do mês', erro)
-		return { transacoes, recorrencias }
+		return { transacoes, recorrencias, futuras }
 	}
 }
 
@@ -96,15 +113,17 @@ export function TransacaoProvider(props: { children: ReactNode }) {
 	})
 	const [transacoes, setTransacoes] = useState<Transacao[]>([])
 	const [recorrencias, setRecorrencias] = useState<Recorrencia[]>([])
+	const [futuras, setFuturas] = useState<Transacao[]>([])
 	const [carregando, setCarregando] = useState(true)
 	const [selecionada, setSelecionada] = useState<Transacao | null>(null)
-	const [repetirNova, setRepetirNova] = useState(false)
+	const [comoLancarNova, setComoLancarNova] = useState<ComoLancar>('uma')
 	const [modalAberto, { open: abrirModal, close: fecharModal }] = useDisclosure(false)
 	const [aConfirmar, setAConfirmar] = useState<Transacao | null>(null)
 
 	const aplicar = useCallback((dados: DadosDoMes) => {
 		setTransacoes(dados.transacoes)
 		setRecorrencias(dados.recorrencias)
+		setFuturas(dados.futuras)
 		setCarregando(false)
 	}, [])
 
@@ -127,18 +146,29 @@ export function TransacaoProvider(props: { children: ReactNode }) {
 	}, [usuario, data, aplicar])
 
 	const projecoes = mesFuturo(data)
-		? recorrencias.filter((r) => r.id && geraNoMes(r, data)).map((r) => gerarLancamento(r, data))
+		? recorrencias
+				.filter((r) => r.id && geraNoMes(r, data))
+				.map((r) => gerarLancamento(r, data))
 		: []
 
 	async function salvar(transacao: Transacao, opcoes: OpcoesSalvar = {}) {
 		if (!usuario) return
 		if (opcoes.repetir && !transacao.id) {
 			await servicos.recorrencia.criarDeTransacao(usuario, transacao, opcoes.repetir)
+		} else if (opcoes.parcelar && !transacao.id) {
+			await servicos.parcelas.criar(usuario, transacao, opcoes.parcelar)
+		} else if (transacao.compraId) {
+			await servicos.parcelas.salvar(
+				usuario,
+				transacao,
+				opcoes.escopo ?? 'este',
+				opcoes.totalParcelas,
+			)
 		} else if (transacao.recorrenciaId) {
 			await servicos.recorrencia.salvarLancamento(
 				usuario,
 				transacao,
-				opcoes.escopo ?? 'este',
+				(opcoes.escopo ?? 'este') as Escopo,
 				recorrencias,
 			)
 		} else {
@@ -147,14 +177,26 @@ export function TransacaoProvider(props: { children: ReactNode }) {
 		await recarregar()
 	}
 
-	async function excluir(transacao: Transacao, escopo: Escopo = 'este') {
+	async function excluir(transacao: Transacao, escopo: EscopoParcela = 'este') {
 		if (!usuario) return
-		if (transacao.recorrenciaId) {
-			await servicos.recorrencia.excluirLancamento(usuario, transacao, escopo, recorrencias)
+		if (transacao.compraId) {
+			await servicos.parcelas.excluir(usuario, transacao, escopo)
+		} else if (transacao.recorrenciaId) {
+			await servicos.recorrencia.excluirLancamento(
+				usuario,
+				transacao,
+				escopo === 'todas' ? 'proximos' : escopo,
+				recorrencias,
+			)
 		} else {
 			await servicos.transacao.excluir(transacao, usuario)
 		}
 		await recarregar()
+	}
+
+	async function consultarCompra(parcela: Transacao) {
+		if (!usuario || !parcela.compraId) return []
+		return servicos.parcelas.consultarCompra(usuario, parcela.compraId)
 	}
 
 	async function confirmarValor(transacao: Transacao, valor: number, novaData: Date) {
@@ -188,7 +230,7 @@ export function TransacaoProvider(props: { children: ReactNode }) {
 			setAConfirmar(transacao)
 			return
 		}
-		setRepetirNova(false)
+		setComoLancarNova('uma')
 		setSelecionada(transacao)
 		abrirModal()
 	}
@@ -200,19 +242,21 @@ export function TransacaoProvider(props: { children: ReactNode }) {
 				transacoes,
 				recorrencias,
 				projecoes,
+				futuras,
 				carregando,
 				tipoExibicao,
 				alterarData: setData,
 				alterarTipoExibicao: setTipoExibicao,
 				salvar,
 				excluir,
+				consultarCompra,
 				confirmarValor,
 				editarRecorrencia,
 				alterarAtiva,
 				excluirRecorrencia,
 				abrirNova: (opcoes) => {
 					setSelecionada(null)
-					setRepetirNova(!!opcoes?.repetir)
+					setComoLancarNova(opcoes?.comoLancar ?? 'uma')
 					abrirModal()
 				},
 				abrirEdicao,
@@ -224,10 +268,11 @@ export function TransacaoProvider(props: { children: ReactNode }) {
 				aberto={modalAberto}
 				fechar={fecharModal}
 				transacao={selecionada}
-				repetir={repetirNova}
+				comoLancar={comoLancarNova}
 				recorrencias={recorrencias}
 				salvar={salvar}
 				excluir={excluir}
+				consultarCompra={consultarCompra}
 			/>
 			<ModalConfirmarValor
 				transacao={aConfirmar}
@@ -235,7 +280,7 @@ export function TransacaoProvider(props: { children: ReactNode }) {
 				confirmar={confirmarValor}
 				editarTudo={(t) => {
 					setAConfirmar(null)
-					setRepetirNova(false)
+					setComoLancarNova('uma')
 					setSelecionada(t)
 					abrirModal()
 				}}

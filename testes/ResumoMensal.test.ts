@@ -5,7 +5,12 @@ import Transacao from '../app/src/logic/core/financas/Transacao'
 import { TipoTransacao } from '../app/src/logic/core/financas/TipoTransacao'
 
 let contador = 0
-function transacao(tipo: TipoTransacao, valor: number, dia: number, categoria = 'Outros'): Transacao {
+function transacao(
+	tipo: TipoTransacao,
+	valor: number,
+	dia: number,
+	categoria = 'Outros',
+): Transacao {
 	contador++
 	return {
 		id: `t${contador}`,
@@ -23,6 +28,7 @@ describe('calcularResumo', () => {
 		assert.deepEqual(resumo, {
 			receitas: 0,
 			despesas: 0,
+			despesasParceladas: 0,
 			guardado: 0,
 			saldo: 0,
 			qtdReceitas: 0,
@@ -98,19 +104,24 @@ describe('calcularResumo', () => {
 		const lista = [5, 1, 3].map((dia) => transacao(TipoTransacao.DESPESA, dia, dia))
 		const ordemOriginal = lista.map((t) => t.id)
 		calcularResumo(lista)
-		assert.deepEqual(lista.map((t) => t.id), ordemOriginal)
+		assert.deepEqual(
+			lista.map((t) => t.id),
+			ordemOriginal,
+		)
 	})
 })
 
 describe('calcularResumo com contas previstas', () => {
 	it('previstas ficam fora de totais, saldo, categorias e listas', () => {
-		const luz = { ...transacao(TipoTransacao.DESPESA, 180, 20, 'Moradia'), situacao: 'prevista' as const }
-		const aluguel = { ...transacao(TipoTransacao.DESPESA, 1200, 10, 'Moradia'), situacao: 'confirmada' as const }
-		const resumo = calcularResumo([
-			transacao(TipoTransacao.RECEITA, 3000, 5),
-			aluguel,
-			luz,
-		])
+		const luz = {
+			...transacao(TipoTransacao.DESPESA, 180, 20, 'Moradia'),
+			situacao: 'prevista' as const,
+		}
+		const aluguel = {
+			...transacao(TipoTransacao.DESPESA, 1200, 10, 'Moradia'),
+			situacao: 'confirmada' as const,
+		}
+		const resumo = calcularResumo([transacao(TipoTransacao.RECEITA, 3000, 5), aluguel, luz])
 		assert.equal(resumo.despesas, 1200)
 		assert.equal(resumo.saldo, 1800)
 		assert.deepEqual(resumo.gastosPorCategoria, [{ categoria: 'Moradia', total: 1200 }])
@@ -121,7 +132,10 @@ describe('calcularResumo com contas previstas', () => {
 	})
 
 	it('depois de confirmada entra normalmente', () => {
-		const luz = { ...transacao(TipoTransacao.DESPESA, 196.4, 20), situacao: 'confirmada' as const }
+		const luz = {
+			...transacao(TipoTransacao.DESPESA, 196.4, 20),
+			situacao: 'confirmada' as const,
+		}
 		const resumo = calcularResumo([luz])
 		assert.equal(resumo.despesas, 196.4)
 		assert.equal(resumo.totalPrevisto, 0)

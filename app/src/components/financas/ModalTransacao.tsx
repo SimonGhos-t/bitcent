@@ -2,8 +2,8 @@
 import { Modal, Stack, Text, Title } from '@mantine/core'
 import Transacao, { criarTransacaoVazia } from '../../logic/core/financas/Transacao'
 import Recorrencia from '../../logic/core/financas/Recorrencia'
-import { Escopo } from '../../logic/core/financas/ServicosRecorrencia'
-import { OpcoesSalvar } from '../../data/contexts/TransacaoContext'
+import { EscopoParcela } from '../../logic/core/financas/ServicosParcelas'
+import { ComoLancar, OpcoesSalvar } from '../../data/contexts/TransacaoContext'
 import Data from '../../logic/utils/Data'
 import FormularioTransacao from './FormularioTransacao'
 import useCelular from '../../data/hooks/useCelular'
@@ -13,10 +13,11 @@ interface ModalTransacaoProps {
 	fechar: () => void
 	// Sem transação (ou sem id) = cadastrar nova
 	transacao?: Transacao | null
-	repetir?: boolean
+	comoLancar?: ComoLancar
 	recorrencias?: Recorrencia[]
 	salvar: (transacao: Transacao, opcoes?: OpcoesSalvar) => Promise<void> | void
-	excluir: (transacao: Transacao, escopo?: Escopo) => Promise<void> | void
+	excluir: (transacao: Transacao, escopo?: EscopoParcela) => Promise<void> | void
+	consultarCompra?: (parcela: Transacao) => Promise<Transacao[]>
 }
 
 export default function ModalTransacao(props: ModalTransacaoProps) {
@@ -37,7 +38,7 @@ export default function ModalTransacao(props: ModalTransacaoProps) {
 					<Title order={3} size="h4">
 						{editando
 							? 'Editar transação'
-							: props.repetir
+							: props.comoLancar === 'mensal'
 								? 'Nova conta fixa'
 								: 'Nova transação'}
 					</Title>
@@ -51,10 +52,11 @@ export default function ModalTransacao(props: ModalTransacaoProps) {
 			}
 		>
 			<FormularioTransacao
-				key={props.transacao?.id ?? (props.repetir ? 'nova-fixa' : 'nova')}
+				key={props.transacao?.id ?? `nova-${props.comoLancar ?? 'uma'}`}
 				modo={editando ? 'editar' : 'nova'}
-				repetir={props.repetir}
+				comoLancar={props.comoLancar}
 				recorrencias={props.recorrencias}
+				consultarCompra={props.consultarCompra}
 				transacao={editando && props.transacao ? props.transacao : criarTransacaoVazia()}
 				salvar={props.salvar}
 				excluir={props.excluir}

@@ -91,7 +91,11 @@ export default function Resumo(props: { resumo: ResumoMensal }) {
 					titulo="Despesas"
 					valor={Dinheiro.formatar(r.despesas)}
 					detalhe={
-						r.receitas ? `${porcentagem(r.despesas, r.receitas)} do que entrou` : null
+						r.despesasParceladas
+							? `${Dinheiro.formatar(r.despesasParceladas)} em parcelas`
+							: r.receitas
+								? `${porcentagem(r.despesas, r.receitas)} do que entrou`
+								: null
 					}
 					destaque={
 						<ThemeIcon variant="light" color="red" radius="md" size={34}>

@@ -2,17 +2,17 @@
 import 'dayjs/locale/pt-br'
 import {
 	ActionIcon,
+	Anchor,
 	Button,
 	Checkbox,
 	Group,
 	Modal,
+	NumberInput,
 	Paper,
-	Radio,
 	SegmentedControl,
 	Select,
 	SimpleGrid,
 	Stack,
-	Switch,
 	Text,
 	TextInput,
 } from '@mantine/core'
@@ -22,38 +22,49 @@ import {
 	IconCalendarWeek,
 	IconCategory,
 	IconCategoryPlus,
+	IconCreditCard,
 	IconDeviceFloppy,
 	IconRepeat,
 	IconTrash,
 } from '@tabler/icons-react'
 import dayjs from 'dayjs'
 import { useRef, useState } from 'react'
-import Transacao, { transacaoValida } from '../../logic/core/financas/Transacao'
+import Transacao, { ehParcela, transacaoValida } from '../../logic/core/financas/Transacao'
 import Recorrencia, { mesDeAnoMes } from '../../logic/core/financas/Recorrencia'
-import { Escopo } from '../../logic/core/financas/ServicosRecorrencia'
-import { OpcoesSalvar } from '../../data/contexts/TransacaoContext'
+import {
+	dataDaParcela,
+	MAX_PARCELAS,
+	MIN_PARCELAS,
+	quantidadeValida,
+} from '../../logic/core/financas/Parcelas'
+import { EscopoParcela } from '../../logic/core/financas/ServicosParcelas'
+import { ComoLancar, OpcoesSalvar } from '../../data/contexts/TransacaoContext'
 import { TipoTransacao } from '../../logic/core/financas/TipoTransacao'
 import Dinheiro from '../../logic/utils/Dinheiro'
 import Data from '../../logic/utils/Data'
 import useFormulario from '../../data/hooks/useFormulario'
 import useCategorias from '../../data/hooks/useCategorias'
 import useCelular from '../../data/hooks/useCelular'
+import ModalEscopo, { OpcaoEscopo } from './ModalEscopo'
 
 interface FormularioTransacaoProps {
 	transacao: Transacao
 	modo: 'nova' | 'editar'
-	// Nova: começa com "Repetir todo mês" ligado
-	repetir?: boolean
+	// Nova: como o formulário começa (ex.: "mensal" na tela Contas fixas)
+	comoLancar?: ComoLancar
 	// Para mostrar de qual conta fixa é o lançamento
 	recorrencias?: Recorrencia[]
 	salvar?: (transacao: Transacao, opcoes?: OpcoesSalvar) => Promise<void> | void
-	excluir?: (transacao: Transacao, escopo?: Escopo) => Promise<void> | void
+	excluir?: (transacao: Transacao, escopo?: EscopoParcela) => Promise<void> | void
+	// Parcelas lançadas da compra (para mostrar quantas serão apagadas)
+	consultarCompra?: (transacao: Transacao) => Promise<Transacao[]>
 	fechar?: () => void
 }
 
 const DIAS_DO_MES = Array.from({ length: 31 }, (_, i) => String(i + 1))
 
-// Campos que, mudados num lançamento de conta fixa, fazem perguntar "só este mês ou os próximos"
+// Campos que, mudados num lançamento de conta fixa ou numa parcela, fazem perguntar
+// "só este" ou "este e os próximos"
 function mudouValores(original: Transacao, atual: Transacao) {
 	return (
 		original.valor !== atual.valor ||
@@ -63,6 +74,9 @@ function mudouValores(original: Transacao, atual: Transacao) {
 		new Date(original.data).getDate() !== new Date(atual.data).getDate()
 	)
 }
+
+// "novembro de 2026"
+const mesAno = (d: Date) => Data.mmyy.formatar(d)
 
 const corDoTipo: Record<TipoTransacao, string> = {
 	[TipoTransacao.DESPESA]: 'red.9',
@@ -76,6 +90,8 @@ const textoSalvar: Record<TipoTransacao, string> = {
 	[TipoTransacao.GUARDADO]: 'Salvar valor guardado',
 }
 
+const somar = (lista: Transacao[]) => lista.reduce((s, t) => s + t.valor, 0)
+
 export default function FormularioTransacao(props: FormularioTransacaoProps) {
 	const { dados, alterarDados, transformarDataFiresbase } = useFormulario<Transacao>(
 		props.transacao,
@@ -88,21 +104,42 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 	const [confirmarExclusao, setConfirmarExclusao] = useState(false)
 	const [salvando, setSalvando] = useState(false)
 	const campoValor = useRef<HTMLInputElement>(null)
-	// Repetir todo mês (só ao cadastrar)
-	const [repetir, setRepetir] = useState(!!props.repetir)
+
+	// Como lançar (só ao cadastrar): uma vez, todo mês ou parcelado
+	const [comoLancar, setComoLancar] = useState<ComoLancar>(props.comoLancar ?? 'uma')
+	// Todo mês
 	const [diaDoMes, setDiaDoMes] = useState<string | null>(null)
 	const [valorVariavel, setValorVariavel] = useState(false)
 	const [fim, setFim] = useState<string | null>(null)
-	// Lançamento de conta fixa: pergunta o escopo antes de salvar ou excluir
+	// Parcelado (ao cadastrar) ou quantidade de parcelas (ao editar uma parcela)
+	const [qtdParcelas, setQtdParcelas] = useState<number | string>(
+		props.transacao.totalParcelas ?? '',
+	)
+	const [jaPaguei, setJaPaguei] = useState(false)
+	const [parcelaAtual, setParcelaAtual] = useState<number | string>(1)
+
+	// Conta fixa ou parcela: pergunta o escopo antes de salvar ou excluir
 	const [perguntarEscopo, setPerguntarEscopo] = useState<'salvar' | 'excluir' | null>(null)
-	const [escopo, setEscopo] = useState<Escopo>('este')
+	const [escopo, setEscopo] = useState<EscopoParcela>('este')
+	const [compra, setCompra] = useState<Transacao[] | null>(null)
+
 	const recorrencia = props.recorrencias?.find((r) => r.id === dados.recorrenciaId)
+	const parcela = props.modo === 'editar' && ehParcela(props.transacao) ? props.transacao : null
+	const parcelado = props.modo === 'nova' && comoLancar === 'parcelado'
+	const mensal = props.modo === 'nova' && comoLancar === 'mensal'
 
 	const categorias = categoriasPorNome(dados.tipo)
 	const subcategorias = categoriasPorDescricao(dados.categoria) ?? []
 	const data = transformarDataFiresbase(dados.data)
 	const hoje = dayjs().startOf('day')
 	const ontem = hoje.subtract(1, 'day')
+
+	const qtd = Number(qtdParcelas)
+	const atual = jaPaguei ? Number(parcelaAtual) : 1
+	const parcelasValidas =
+		quantidadeValida(qtd) && Number.isInteger(atual) && atual >= 1 && atual <= qtd
+	const podeSalvar = transacaoValida(dados) && (!parcelado || parcelasValidas)
+	const mudouQuantidade = !!parcela && qtd !== parcela.totalParcelas
 
 	// Quando só existe uma opção, ela já vem escolhida
 	function unicaOpcao(lista: string[] | undefined) {
@@ -136,7 +173,13 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 	const diaEscolhido = Number(diaDoMes ?? (data ?? new Date()).getDate())
 
 	function pedirSalvar() {
-		if (!transacaoValida(dados) || salvando) return
+		if (!podeSalvar || salvando) return
+		if (parcela && (mudouValores(parcela, dados) || mudouQuantidade)) {
+			if (!quantidadeValida(qtd) || qtd < parcela.parcela!) return
+			setEscopo(mudouQuantidade ? 'proximos' : 'este')
+			setPerguntarEscopo('salvar')
+			return
+		}
 		if (recorrencia && mudouValores(props.transacao, dados)) {
 			setEscopo('este')
 			setPerguntarEscopo('salvar')
@@ -145,22 +188,21 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 		salvar()
 	}
 
-	async function salvar(escopoEscolhido: Escopo = 'este') {
-		if (!transacaoValida(dados) || salvando) return
+	async function salvar(escopoEscolhido: EscopoParcela = 'este') {
+		if (!podeSalvar || salvando) return
 		setSalvando(true)
 		try {
 			await props.salvar?.(dados, {
 				escopo: escopoEscolhido,
-				repetir:
-					props.modo === 'nova' && repetir
-						? { diaDoMes: diaEscolhido, valorVariavel, fim }
-						: undefined,
+				repetir: mensal ? { diaDoMes: diaEscolhido, valorVariavel, fim } : undefined,
+				parcelar: parcelado ? { quantidade: qtd, parcelaAtual: atual } : undefined,
+				totalParcelas: parcela ? qtd : undefined,
 			})
 		} finally {
 			setSalvando(false)
 			setPerguntarEscopo(null)
 		}
-		if (props.modo === 'nova' && cadastrarOutra && !repetir) {
+		if (props.modo === 'nova' && cadastrarOutra && comoLancar === 'uma') {
 			// Mantém tipo, categoria e data; limpa só o valor
 			alterarDados({ ...dados, valor: 0 })
 			campoValor.current?.focus()
@@ -169,8 +211,13 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 		props.fechar?.()
 	}
 
-	function pedirExcluir() {
-		if (recorrencia) {
+	async function pedirExcluir() {
+		if (parcela) {
+			setEscopo('este')
+			setCompra(null)
+			setPerguntarEscopo('excluir')
+			setCompra((await props.consultarCompra?.(parcela)) ?? null)
+		} else if (recorrencia) {
 			setEscopo('este')
 			setPerguntarEscopo('excluir')
 		} else {
@@ -178,14 +225,115 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 		}
 	}
 
-	async function excluir(escopoEscolhido: Escopo = 'este') {
-		await props.excluir?.(props.transacao, escopoEscolhido)
+	async function excluir(escopoEscolhido: EscopoParcela = 'este') {
+		setSalvando(true)
+		try {
+			await props.excluir?.(props.transacao, escopoEscolhido)
+		} finally {
+			setSalvando(false)
+		}
 		setConfirmarExclusao(false)
 		setPerguntarEscopo(null)
 		props.fechar?.()
 	}
 
-	const mesDoLancamento = Data.mmyy.formatar(new Date(props.transacao.data)).split(' de ')[0]
+	// Resumo do parcelado: total da compra e período das parcelas lançadas
+	const resumoParcelado =
+		parcelado && parcelasValidas && data
+			? {
+					total: dados.valor * qtd,
+					inicio: mesAno(data),
+					fim: mesAno(dataDaParcela(data, atual, qtd)),
+				}
+			: null
+
+	const opcoesEscopo = (): OpcaoEscopo<EscopoParcela>[] => {
+		const mesDoLancamento = Data.mmyy.formatar(new Date(props.transacao.data)).split(' de ')[0]
+		if (parcela) {
+			const n = parcela.parcela!
+			const total = parcela.totalParcelas!
+			if (perguntarEscopo === 'salvar') {
+				const valor = Dinheiro.formatar(dados.valor)
+				const proximos =
+					qtd > total
+						? `As parcelas ${n} a ${total} ficam com ${valor} e entram as parcelas ${total + 1} a ${qtd}.`
+						: qtd < total
+							? `As parcelas ${n} a ${qtd} ficam com ${valor} e as parcelas ${qtd + 1} a ${total} são apagadas.`
+							: `As parcelas ${n} a ${total} ficam com ${valor}.`
+				return [
+					{
+						valor: 'este',
+						titulo: 'Só esta parcela',
+						descricao: mudouQuantidade
+							? 'Para mudar o número de parcelas, use a outra opção.'
+							: `Muda apenas a parcela ${n}. As outras ficam como estão.`,
+						desabilitada: mudouQuantidade,
+					},
+					{
+						valor: 'proximos',
+						titulo: 'Esta e as próximas',
+						descricao: `${proximos}${n > 1 ? ' As anteriores não mudam.' : ''}`,
+					},
+				]
+			}
+			const lista = compra ?? []
+			const daqui = lista.filter((t) => (t.parcela ?? 0) >= n)
+			const carregou = compra !== null
+			return [
+				{
+					valor: 'este',
+					titulo: `Só esta parcela (${n}/${total})`,
+					descricao: 'As outras parcelas continuam.',
+				},
+				{
+					valor: 'proximos',
+					titulo: carregou
+						? `Esta e as próximas · ${daqui.length} ${daqui.length === 1 ? 'parcela' : 'parcelas'}`
+						: 'Esta e as próximas',
+					descricao: carregou
+						? `Apaga da ${n}ª em diante (${Dinheiro.formatar(somar(daqui))}).${n > 1 ? ' As anteriores ficam no histórico.' : ''}`
+						: 'Contando as parcelas…',
+				},
+				{
+					valor: 'todas',
+					titulo: carregou
+						? `A compra inteira · ${lista.length} ${lista.length === 1 ? 'parcela' : 'parcelas'}`
+						: 'A compra inteira',
+					descricao: carregou
+						? `Apaga todas as parcelas, inclusive as que já venceram (${Dinheiro.formatar(somar(lista))}).`
+						: 'Contando as parcelas…',
+				},
+			]
+		}
+		const excluindo = perguntarEscopo === 'excluir'
+		return [
+			{
+				valor: 'este',
+				titulo: `Só ${mesDoLancamento}`,
+				descricao: excluindo
+					? 'A conta fixa continua e volta no mês seguinte.'
+					: 'Muda só este lançamento. A conta fixa continua como está.',
+			},
+			{
+				valor: 'proximos',
+				titulo: 'Este e os próximos meses',
+				descricao: excluindo
+					? 'Encerra a conta fixa no mês anterior. Os meses anteriores ficam no histórico.'
+					: 'A conta fixa passa a usar estes valores daqui em diante. Os meses anteriores ficam como estão.',
+			},
+		]
+	}
+
+	const textoExcluirEscopo = () => {
+		if (!parcela || !compra) return 'Excluir'
+		const qtdApagar =
+			escopo === 'todas'
+				? compra.length
+				: escopo === 'proximos'
+					? compra.filter((t) => (t.parcela ?? 0) >= parcela.parcela!).length
+					: 1
+		return qtdApagar === 1 ? 'Excluir 1 parcela' : `Excluir ${qtdApagar} parcelas`
+	}
 
 	return (
 		<form
@@ -204,6 +352,15 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 						</Text>
 					</Group>
 				)}
+				{parcela && (
+					<Group gap={8} wrap="nowrap" c="cyan.4">
+						<IconCreditCard size={18} aria-hidden />
+						<Text size="sm" c="dark.1">
+							Parcela {parcela.parcela} de {parcela.totalParcelas} · compra parcelada
+						</Text>
+					</Group>
+				)}
+
 				<SegmentedControl
 					fullWidth
 					value={dados.tipo}
@@ -216,9 +373,28 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 					]}
 				/>
 
+				{props.modo === 'nova' && (
+					<div>
+						<Text id="como-lancar" size="sm" fw={500} mb={4}>
+							Como lançar
+						</Text>
+						<SegmentedControl
+							aria-labelledby="como-lancar"
+							fullWidth
+							value={comoLancar}
+							onChange={(v) => setComoLancar(v as ComoLancar)}
+							data={[
+								{ label: 'Só uma vez', value: 'uma' },
+								{ label: 'Todo mês', value: 'mensal' },
+								{ label: 'Parcelado', value: 'parcelado' },
+							]}
+						/>
+					</div>
+				)}
+
 				<TextInput
 					ref={campoValor}
-					label="Valor"
+					label={parcelado || parcela ? 'Valor da parcela' : 'Valor'}
 					size="lg"
 					inputMode="numeric"
 					data-autofocus
@@ -239,6 +415,28 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 						})
 					}
 				/>
+
+				{parcela && (
+					<Group gap="md" wrap="nowrap" align="flex-end">
+						<NumberInput
+							label="Parcelas"
+							w={64}
+							min={Math.max(MIN_PARCELAS, parcela.parcela!)}
+							max={MAX_PARCELAS}
+							allowDecimal={false}
+							allowNegative={false}
+							hideControls
+							suffix="x"
+							value={qtdParcelas}
+							onChange={setQtdParcelas}
+						/>
+						<Text size="sm" c="dimmed" pb={8} style={{ whiteSpace: 'nowrap' }}>
+							{quantidadeValida(qtd)
+								? `${qtd}x de ${Dinheiro.formatar(dados.valor)}`
+								: `De ${Math.max(MIN_PARCELAS, parcela.parcela!)} a ${MAX_PARCELAS} parcelas`}
+						</Text>
+					</Group>
+				)}
 
 				<SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
 					<Select
@@ -271,7 +469,13 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 
 				<div>
 					<Text component="label" htmlFor="data-transacao" size="sm" fw={500}>
-						{repetir ? 'Primeiro lançamento' : 'Data'}
+						{mensal
+							? 'Primeiro lançamento'
+							: parcelado
+								? jaPaguei
+									? `Data da parcela ${Number.isInteger(atual) && atual > 0 ? atual : ''}`
+									: 'Data da 1ª parcela'
+								: 'Data'}
 					</Text>
 					<Group gap="xs" wrap="nowrap" mt={4}>
 						<DatePickerInput
@@ -302,46 +506,16 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 					</Group>
 				</div>
 
-				{props.modo === 'nova' && (
+				{(mensal || parcelado) && (
 					<Paper
 						withBorder
 						radius="md"
 						p="sm"
-						bg={repetir ? 'rgba(34, 184, 207, 0.05)' : 'transparent'}
-						style={{
-							borderColor: repetir
-								? 'rgba(34, 184, 207, 0.45)'
-								: 'var(--mantine-color-dark-5)',
-						}}
+						bg="rgba(34, 184, 207, 0.05)"
+						style={{ borderColor: 'rgba(34, 184, 207, 0.45)' }}
 					>
-						<Switch
-							checked={repetir}
-							onChange={(e) => setRepetir(e.currentTarget.checked)}
-							labelPosition="left"
-							label={
-								<Group gap="sm" wrap="nowrap">
-									<IconRepeat
-										size={20}
-										color="var(--mantine-color-cyan-4)"
-										aria-hidden
-									/>
-									<div>
-										<Text fw={700} c="bright">
-											Repetir todo mês
-										</Text>
-										<Text size="xs" c="dimmed">
-											Vira uma conta fixa e aparece sozinha nos próximos meses
-										</Text>
-									</div>
-								</Group>
-							}
-							styles={{
-								body: { justifyContent: 'space-between', alignItems: 'center' },
-								labelWrapper: { flex: 1 },
-							}}
-						/>
-						{repetir && (
-							<Stack gap="md" mt="md">
+						{mensal && (
+							<Stack gap="md">
 								<SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md">
 									<Select
 										label="Dia do mês"
@@ -375,6 +549,96 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 								/>
 							</Stack>
 						)}
+
+						{parcelado && (
+							<Stack gap="sm">
+								<Group gap="md" wrap="nowrap" align="flex-end">
+									<NumberInput
+										label="Parcelas"
+										w={64}
+										min={MIN_PARCELAS}
+										max={MAX_PARCELAS}
+										allowDecimal={false}
+										allowNegative={false}
+										hideControls
+										suffix="x"
+										placeholder="10x"
+										value={qtdParcelas}
+										onChange={setQtdParcelas}
+									/>
+									<div className="min-w-0">
+										{resumoParcelado ? (
+											<>
+												<Text
+													fw={800}
+													fz="lg"
+													c="bright"
+													style={{ whiteSpace: 'nowrap' }}
+												>
+													{Dinheiro.formatar(resumoParcelado.total)} no
+													total
+												</Text>
+												<Text
+													size="sm"
+													c="dimmed"
+													style={{ whiteSpace: 'nowrap' }}
+												>
+													{resumoParcelado.inicio === resumoParcelado.fim
+														? `Em ${resumoParcelado.inicio}`
+														: `De ${resumoParcelado.inicio} a ${resumoParcelado.fim}`}
+												</Text>
+											</>
+										) : (
+											<Text size="sm" c="dimmed" pb={8}>
+												De {MIN_PARCELAS} a {MAX_PARCELAS} parcelas
+											</Text>
+										)}
+									</div>
+								</Group>
+								{jaPaguei ? (
+									<Group gap="xs" wrap="nowrap" align="center">
+										<Text size="sm">Este lançamento é a parcela</Text>
+										<NumberInput
+											aria-label="Número da parcela deste lançamento"
+											w={56}
+											min={1}
+											max={quantidadeValida(qtd) ? qtd : MAX_PARCELAS}
+											allowDecimal={false}
+											allowNegative={false}
+											hideControls
+											value={parcelaAtual}
+											onChange={setParcelaAtual}
+										/>
+										<Text size="sm">
+											{quantidadeValida(qtd) ? `de ${qtd}` : ''}
+										</Text>
+										<Anchor
+											component="button"
+											type="button"
+											size="sm"
+											ml="auto"
+											onClick={() => {
+												setJaPaguei(false)
+												setParcelaAtual(1)
+											}}
+										>
+											Cancelar
+										</Anchor>
+									</Group>
+								) : (
+									<Anchor
+										component="button"
+										type="button"
+										size="sm"
+										fw={700}
+										className="self-start"
+										onClick={() => setJaPaguei(true)}
+									>
+										Já paguei algumas parcelas
+									</Anchor>
+								)}
+							</Stack>
+						)}
 					</Paper>
 				)}
 			</Stack>
@@ -388,7 +652,7 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 			>
 				{props.modo === 'nova' ? (
 					<Checkbox
-						disabled={repetir}
+						disabled={comoLancar !== 'uma'}
 						label="Cadastrar outra depois"
 						checked={cadastrarOutra}
 						onChange={(e) => setCadastrarOutra(e.currentTarget.checked)}
@@ -434,12 +698,14 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 						color="green.9"
 						leftSection={<IconDeviceFloppy size={18} />}
 						loading={salvando}
-						disabled={!transacaoValida(dados)}
+						disabled={!podeSalvar}
 					>
 						{props.modo === 'nova'
-							? repetir
+							? mensal
 								? 'Salvar conta fixa'
-								: textoSalvar[dados.tipo]
+								: parcelado
+									? 'Salvar compra parcelada'
+									: textoSalvar[dados.tipo]
 							: 'Salvar alterações'}
 					</Button>
 				</Group>
@@ -466,78 +732,34 @@ export default function FormularioTransacao(props: FormularioTransacaoProps) {
 					>
 						Cancelar
 					</Button>
-					<Button color="red.9" onClick={() => excluir()}>
+					<Button color="red.9" loading={salvando} onClick={() => excluir()}>
 						Excluir
 					</Button>
 				</Group>
 			</Modal>
 
-			{/* Conta fixa: só este mês ou este e os próximos */}
-			<Modal
-				opened={!!perguntarEscopo}
-				onClose={() => setPerguntarEscopo(null)}
-				title={
-					perguntarEscopo === 'excluir'
-						? 'Excluir lançamento de conta fixa'
-						: 'Alterar conta fixa'
+			{/* Conta fixa: só este mês ou este e os próximos.
+			    Parcela: só esta, esta e as próximas ou a compra inteira. */}
+			<ModalEscopo<EscopoParcela>
+				aberto={!!perguntarEscopo}
+				titulo={
+					parcela
+						? perguntarEscopo === 'excluir'
+							? 'Excluir compra parcelada'
+							: 'Alterar parcela'
+						: perguntarEscopo === 'excluir'
+							? 'Excluir lançamento de conta fixa'
+							: 'Alterar conta fixa'
 				}
-				centered
-				size="md"
-			>
-				<Radio.Group value={escopo} onChange={(v) => setEscopo(v as Escopo)}>
-					<Stack gap="sm">
-						<Radio.Card value="este" radius="md" p="md">
-							<Group wrap="nowrap" align="flex-start">
-								<Radio.Indicator />
-								<div>
-									<Text fw={700} c="bright">
-										Só {mesDoLancamento}
-									</Text>
-									<Text size="sm" c="dimmed">
-										{perguntarEscopo === 'excluir'
-											? 'A conta fixa continua e volta no mês seguinte.'
-											: 'Muda só este lançamento. A conta fixa continua como está.'}
-									</Text>
-								</div>
-							</Group>
-						</Radio.Card>
-						<Radio.Card value="proximos" radius="md" p="md">
-							<Group wrap="nowrap" align="flex-start">
-								<Radio.Indicator />
-								<div>
-									<Text fw={700} c="bright">
-										Este e os próximos meses
-									</Text>
-									<Text size="sm" c="dimmed">
-										{perguntarEscopo === 'excluir'
-											? 'Encerra a conta fixa no mês anterior. Os meses anteriores ficam no histórico.'
-											: 'A conta fixa passa a usar estes valores daqui em diante. Os meses anteriores ficam como estão.'}
-									</Text>
-								</div>
-							</Group>
-						</Radio.Card>
-					</Stack>
-				</Radio.Group>
-				<Group justify="flex-end" mt="lg">
-					<Button variant="subtle" color="gray" onClick={() => setPerguntarEscopo(null)}>
-						Cancelar
-					</Button>
-					{perguntarEscopo === 'excluir' ? (
-						<Button color="red.9" onClick={() => excluir(escopo)}>
-							Excluir
-						</Button>
-					) : (
-						<Button
-							color="green.9"
-							loading={salvando}
-							leftSection={<IconDeviceFloppy size={18} />}
-							onClick={() => salvar(escopo)}
-						>
-							Salvar alteração
-						</Button>
-					)}
-				</Group>
-			</Modal>
+				opcoes={perguntarEscopo ? opcoesEscopo() : []}
+				valor={escopo}
+				alterar={setEscopo}
+				acao={perguntarEscopo === 'excluir' ? 'excluir' : 'salvar'}
+				textoAcao={perguntarEscopo === 'excluir' ? textoExcluirEscopo() : undefined}
+				carregando={salvando}
+				confirmar={() => (perguntarEscopo === 'excluir' ? excluir(escopo) : salvar(escopo))}
+				fechar={() => setPerguntarEscopo(null)}
+			/>
 		</form>
 	)
 }

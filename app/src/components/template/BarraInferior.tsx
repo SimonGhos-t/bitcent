@@ -19,7 +19,7 @@ export default function BarraInferior() {
 				size={56}
 				radius="xl"
 				aria-label={emContasFixas ? 'Nova conta fixa' : 'Nova transação'}
-				onClick={() => abrirNova({ repetir: emContasFixas })}
+				onClick={() => abrirNova({ comoLancar: emContasFixas ? 'mensal' : 'uma' })}
 				className="fixed! right-5 bottom-22 z-40 shadow-lg shadow-black/60"
 			>
 				<IconPlus size={26} stroke={2.4} />

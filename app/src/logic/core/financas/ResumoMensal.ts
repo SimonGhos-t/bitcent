@@ -1,4 +1,4 @@
-import Transacao, { ehPrevista } from './Transacao'
+import Transacao, { ehParcela, ehPrevista } from './Transacao'
 import { TipoTransacao } from './TipoTransacao'
 
 export interface TotalCategoria {
@@ -9,6 +9,8 @@ export interface TotalCategoria {
 export interface ResumoMensal {
 	receitas: number
 	despesas: number
+	// Parte das despesas que são parcelas de compras
+	despesasParceladas: number
 	guardado: number
 	saldo: number
 	qtdReceitas: number
@@ -46,6 +48,7 @@ export function calcularResumo(todas: Transacao[]): ResumoMensal {
 	return {
 		receitas: totalReceitas,
 		despesas: totalDespesas,
+		despesasParceladas: somar(despesas.filter(ehParcela)),
 		guardado: totalGuardado,
 		saldo: totalReceitas - totalDespesas - totalGuardado,
 		qtdReceitas: receitas.length,

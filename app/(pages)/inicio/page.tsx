@@ -7,6 +7,7 @@ import CampoMesAno from '../../src/components/template/CampoMesAno'
 import Resumo from '../../src/components/financas/Resumo'
 import PainelMes from '../../src/components/financas/PainelMes'
 import ContasDoMes from '../../src/components/financas/ContasDoMes'
+import ParcelasFuturas from '../../src/components/financas/ParcelasFuturas'
 import PaginaInicial from '@/app/src/components/template/PaginaInicial'
 import { calcularResumo } from '@/app/src/logic/core/financas/ResumoMensal'
 import Data from '@/app/src/logic/utils/Data'
@@ -17,6 +18,7 @@ export default function Inicio() {
 		alterarData,
 		transacoes,
 		projecoes,
+		futuras,
 		abrirNova,
 		abrirEdicao,
 		abrirConfirmacao,
@@ -50,6 +52,7 @@ export default function Inicio() {
 				aoClicar={abrirEdicao}
 				confirmar={abrirConfirmacao}
 			/>
+			<ParcelasFuturas futuras={futuras} mes={data} />
 			<PainelMes resumo={resumo} aoClicar={abrirEdicao} />
 		</PaginaInicial>
 	)
