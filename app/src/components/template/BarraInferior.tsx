@@ -7,24 +7,26 @@ import useTransacao from '../../data/hooks/useTransacao'
 import { itensMenu } from './itensMenu'
 
 // Navegação do celular: barra fixa embaixo + botão flutuante de nova transação
+// (em Contas fixas, o botão cadastra uma conta fixa)
 export default function BarraInferior() {
 	const caminho = usePathname()
 	const { abrirNova } = useTransacao()
+	const emContasFixas = caminho.startsWith('/contas-fixas')
 
 	return (
 		<Box hiddenFrom="sm">
 			<ActionIcon
 				size={56}
 				radius="xl"
-				aria-label="Nova transação"
-				onClick={abrirNova}
+				aria-label={emContasFixas ? 'Nova conta fixa' : 'Nova transação'}
+				onClick={() => abrirNova({ repetir: emContasFixas })}
 				className="fixed! right-5 bottom-22 z-40 shadow-lg shadow-black/60"
 			>
 				<IconPlus size={26} stroke={2.4} />
 			</ActionIcon>
 			<nav
 				aria-label="Principal"
-				className="fixed bottom-0 inset-x-0 z-30 grid grid-cols-3 h-18 pb-2 bg-black border-t border-(--mantine-color-dark-5)"
+				className="fixed bottom-0 inset-x-0 z-30 grid grid-cols-4 h-18 pb-2 bg-black border-t border-(--mantine-color-dark-5)"
 			>
 				{itensMenu.map((item) => {
 					const ativo = caminho.startsWith(item.href)
@@ -42,7 +44,7 @@ export default function BarraInferior() {
 						>
 							<item.icone size={22} stroke={1.8} />
 							<Text size="xs" fw={ativo ? 700 : 500} c="inherit">
-								{item.nome}
+								{item.nomeCurto ?? item.nome}
 							</Text>
 						</Link>
 					)

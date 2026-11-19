@@ -1,5 +1,5 @@
 import { Group, Text } from '@mantine/core'
-import Transacao from '../../logic/core/financas/Transacao'
+import Transacao, { ehPrevista } from '../../logic/core/financas/Transacao'
 import { TipoTransacao } from '../../logic/core/financas/TipoTransacao'
 import { maisRecentesPrimeiro } from '../../logic/core/financas/ResumoMensal'
 import Dinheiro from '../../logic/utils/Dinheiro'
@@ -26,7 +26,8 @@ export function agruparPorDia(transacoes: Transacao[]): Dia[] {
 		const chave = data.toDateString()
 		const dia = dias.get(chave) ?? { chave, data, itens: [], saldo: 0 }
 		dia.itens.push(t)
-		dia.saldo += t.tipo === TipoTransacao.RECEITA ? t.valor : -t.valor
+		// Previstas não entram no saldo do dia (como no saldo do mês)
+		if (!ehPrevista(t)) dia.saldo += t.tipo === TipoTransacao.RECEITA ? t.valor : -t.valor
 		dias.set(chave, dia)
 	}
 	return [...dias.values()]

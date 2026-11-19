@@ -1,6 +1,6 @@
 'use client'
-import { Button, Group, SegmentedControl, Select, TextInput } from '@mantine/core'
-import { IconLayoutGrid, IconList, IconPlus, IconSearch } from '@tabler/icons-react'
+import { Button, Chip, Group, SegmentedControl, Select, TextInput } from '@mantine/core'
+import { IconLayoutGrid, IconList, IconPlus, IconRepeat, IconSearch } from '@tabler/icons-react'
 import { useMemo, useState } from 'react'
 import Grade from '@/app/src/components/financas/Grade'
 import TotaisTransacoes from '@/app/src/components/financas/TotaisTransacoes'
@@ -11,6 +11,7 @@ import PaginaInicial from '@/app/src/components/template/PaginaInicial'
 import useTransacao, { TipoExibicao } from '@/app/src/data/hooks/useTransacao'
 import { calcularResumo } from '@/app/src/logic/core/financas/ResumoMensal'
 import { TipoTransacao } from '@/app/src/logic/core/financas/TipoTransacao'
+import { ehPrevista } from '@/app/src/logic/core/financas/Transacao'
 import categorias from '@/app/src/data/constants/categorias'
 import useCelular from '@/app/src/data/hooks/useCelular'
 
@@ -35,6 +36,10 @@ export default function Transacoes() {
 	const celular = useCelular()
 	const [tipo, setTipo] = useState<'todas' | TipoTransacao>('todas')
 	const [categoria, setCategoria] = useState<string | null>(null)
+	const [soFixas, setSoFixas] = useState(false)
+	const [soAConfirmar, setSoAConfirmar] = useState(false)
+	const temFixas = transacoes.some((t) => t.recorrenciaId)
+	const qtdAConfirmar = transacoes.filter(ehPrevista).length
 
 	const filtradas = useMemo(() => {
 		const termo = normalizar(busca.trim())
@@ -42,12 +47,19 @@ export default function Transacoes() {
 			(t) =>
 				(tipo === 'todas' || t.tipo === tipo) &&
 				(!categoria || t.categoria === categoria) &&
+				(!soFixas || !temFixas || !!t.recorrenciaId) &&
+				(!soAConfirmar || !qtdAConfirmar || ehPrevista(t)) &&
 				(!termo || normalizar(`${t.descricao} ${t.categoria}`).includes(termo)),
 		)
-	}, [transacoes, busca, tipo, categoria])
+	}, [transacoes, busca, tipo, categoria, soFixas, soAConfirmar, temFixas, qtdAConfirmar])
 
 	const totais = calcularResumo(filtradas)
-	const filtrando = busca.trim() !== '' || tipo !== 'todas' || !!categoria
+	const filtrando =
+		busca.trim() !== '' ||
+		tipo !== 'todas' ||
+		!!categoria ||
+		(soFixas && temFixas) ||
+		(soAConfirmar && qtdAConfirmar > 0)
 
 	return (
 		<PaginaInicial
@@ -60,7 +72,7 @@ export default function Transacoes() {
 					<Button
 						size="md"
 						leftSection={<IconPlus size={18} stroke={2.2} />}
-						onClick={abrirNova}
+						onClick={() => abrirNova()}
 					>
 						Nova transação
 					</Button>
@@ -134,6 +146,29 @@ export default function Transacoes() {
 					/>
 				</Group>
 			</Group>
+
+			{temFixas && (
+				<Group gap="xs">
+					<Chip
+						checked={soFixas}
+						onChange={setSoFixas}
+						variant="outline"
+						icon={<IconRepeat size={14} />}
+					>
+						Só contas fixas
+					</Chip>
+					{qtdAConfirmar > 0 && (
+						<Chip
+							checked={soAConfirmar}
+							onChange={setSoAConfirmar}
+							variant="outline"
+							color="yellow"
+						>
+							A confirmar · {qtdAConfirmar}
+						</Chip>
+					)}
+				</Group>
+			)}
 
 			<TotaisTransacoes totais={totais} />
 

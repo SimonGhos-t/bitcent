@@ -119,7 +119,11 @@ export default function Resumo(props: { resumo: ResumoMensal }) {
 					titulo="Saldo do mês"
 					valor={`${saldoNegativo ? '−' : ''}${Dinheiro.formatar(Math.abs(r.saldo))}`}
 					cor={saldoNegativo ? 'red.4' : r.saldo > 0 ? 'green.4' : 'bright'}
-					detalhe="Receitas − despesas − guardado"
+					detalhe={
+						r.previstas.length
+							? `Sem ${r.previstas.length === 1 ? 'a prevista' : `as ${r.previstas.length} previstas`} (≈ ${Dinheiro.formatar(r.totalPrevisto)})`
+							: 'Receitas − despesas − guardado'
+					}
 					destaque={
 						r.saldo === 0 ? (
 							<ThemeIcon variant="light" color="gray" radius="md" size={34}>

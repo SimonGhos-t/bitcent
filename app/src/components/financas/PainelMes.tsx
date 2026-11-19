@@ -71,6 +71,11 @@ export default function PainelMes(props: PainelMesProps) {
 					) : (
 						<Vazio>Nenhuma despesa neste mês.</Vazio>
 					)}
+					{props.resumo.previstas.length > 0 && (
+						<Text size="xs" c="dimmed" mt="md">
+							Contas previstas ainda não entram aqui: só depois de confirmadas.
+						</Text>
+					)}
 				</Cartao>
 
 				<Cartao className="lg:col-span-2" px={0} pb="xs">

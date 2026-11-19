@@ -1,5 +1,6 @@
 import { Group, SimpleGrid, Text, UnstyledButton } from '@mantine/core'
-import Transacao from '../../logic/core/financas/Transacao'
+import Transacao, { ehPrevista } from '../../logic/core/financas/Transacao'
+import MarcasTransacao from './MarcasTransacao'
 import { maisRecentesPrimeiro } from '../../logic/core/financas/ResumoMensal'
 import Data from '../../logic/utils/Data'
 import IconeTransacao from './IconeTransacao'
@@ -21,7 +22,9 @@ export default function Grade(props: GradeProps) {
 					p="md"
 					className="flex flex-col gap-4 rounded-xl transition-colors"
 					style={{
-						border: '1px solid var(--mantine-color-dark-5)',
+						border: ehPrevista(t)
+							? '1px dashed rgba(255, 212, 59, 0.35)'
+							: '1px solid var(--mantine-color-dark-5)',
 						background: 'var(--mantine-color-dark-7)',
 					}}
 				>
@@ -29,16 +32,19 @@ export default function Grade(props: GradeProps) {
 					<Group wrap="nowrap" gap="sm">
 						<IconeTransacao categoria={t.categoria} tipo={t.tipo} />
 						<div className="min-w-0">
-							<Text fw={600} c="bright" truncate>
-								{t.descricao || t.categoria || 'Sem categoria'}
-							</Text>
+							<div className="flex items-center gap-2 min-w-0">
+								<Text fw={600} c="bright" truncate>
+									{t.descricao || t.categoria || 'Sem categoria'}
+								</Text>
+								<MarcasTransacao transacao={t} />
+							</div>
 							<Text size="xs" c="dimmed" truncate>
 								{t.categoria}
 							</Text>
 						</div>
 					</Group>
 					<Group justify="space-between" align="baseline" wrap="nowrap" gap="sm">
-						<ValorTransacao valor={t.valor} tipo={t.tipo} fz="xl" />
+						<ValorTransacao valor={t.valor} tipo={t.tipo} prevista={ehPrevista(t)} fz="xl" />
 						<Text size="xs" c="dimmed" style={{ whiteSpace: 'nowrap' }}>
 							{Data.ddmm.formatar(new Date(t.data))}
 						</Text>
