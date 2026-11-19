@@ -29,6 +29,8 @@ describe('calcularResumo', () => {
 			gastosPorCategoria: [],
 			maioresGastos: [],
 			ultimas: [],
+			previstas: [],
+			totalPrevisto: 0,
 		})
 	})
 
@@ -97,6 +99,32 @@ describe('calcularResumo', () => {
 		const ordemOriginal = lista.map((t) => t.id)
 		calcularResumo(lista)
 		assert.deepEqual(lista.map((t) => t.id), ordemOriginal)
+	})
+})
+
+describe('calcularResumo com contas previstas', () => {
+	it('previstas ficam fora de totais, saldo, categorias e listas', () => {
+		const luz = { ...transacao(TipoTransacao.DESPESA, 180, 20, 'Moradia'), situacao: 'prevista' as const }
+		const aluguel = { ...transacao(TipoTransacao.DESPESA, 1200, 10, 'Moradia'), situacao: 'confirmada' as const }
+		const resumo = calcularResumo([
+			transacao(TipoTransacao.RECEITA, 3000, 5),
+			aluguel,
+			luz,
+		])
+		assert.equal(resumo.despesas, 1200)
+		assert.equal(resumo.saldo, 1800)
+		assert.deepEqual(resumo.gastosPorCategoria, [{ categoria: 'Moradia', total: 1200 }])
+		assert.ok(!resumo.maioresGastos.includes(luz))
+		assert.ok(!resumo.ultimas.includes(luz))
+		assert.deepEqual(resumo.previstas, [luz])
+		assert.equal(resumo.totalPrevisto, 180)
+	})
+
+	it('depois de confirmada entra normalmente', () => {
+		const luz = { ...transacao(TipoTransacao.DESPESA, 196.4, 20), situacao: 'confirmada' as const }
+		const resumo = calcularResumo([luz])
+		assert.equal(resumo.despesas, 196.4)
+		assert.equal(resumo.totalPrevisto, 0)
 	})
 })
 

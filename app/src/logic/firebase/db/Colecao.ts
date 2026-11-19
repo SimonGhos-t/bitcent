@@ -27,6 +27,11 @@ export interface Filtro {
 	valor: any
 }
 
+// O Firestore recusa campos com undefined: ficam de fora do documento
+function semIndefinidos(entidade: any) {
+	return Object.fromEntries(Object.entries(entidade).filter(([, valor]) => valor !== undefined))
+}
+
 // Limite de operações de um writeBatch no Firestore
 const LIMITE_LOTE = 500
 
@@ -35,7 +40,7 @@ export default class Colecao {
 		const db = getFirestore(app)
 		const idFinal = id ?? entidade.id ?? Id.novo()
 		const docRef = doc(db, caminho, idFinal)
-		await setDoc(docRef, entidade)
+		await setDoc(docRef, semIndefinidos(entidade))
 
 		return {
 			...entidade,
@@ -57,7 +62,7 @@ export default class Colecao {
 
 		for (const lote of this._dividirEmLotes(itens)) {
 			const batch = writeBatch(db)
-			lote.forEach(({ id, entidade }) => batch.set(doc(db, caminho, id), entidade))
+			lote.forEach(({ id, entidade }) => batch.set(doc(db, caminho, id), semIndefinidos(entidade)))
 			await batch.commit()
 		}
 		return itens.map(({ id, entidade }) => ({ ...entidade, id }))

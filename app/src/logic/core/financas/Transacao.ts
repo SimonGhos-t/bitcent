@@ -9,6 +9,16 @@ export default interface Transacao {
 	data: Date
 	tipo: TipoTransacao
 	parcelada?: boolean
+	// Contas fixas (v2.2): lançamento gerado por uma recorrência
+	recorrenciaId?: string
+	// "prevista" = valor ainda não confirmado; não entra nos totais nem no saldo
+	situacao?: SituacaoTransacao
+}
+
+export type SituacaoTransacao = 'prevista' | 'confirmada'
+
+export function ehPrevista(transacao: Transacao): boolean {
+	return transacao.situacao === 'prevista'
 }
 
 // Função (e não constante) para que a data padrão seja sempre a de hoje,
