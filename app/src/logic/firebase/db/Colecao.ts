@@ -1,6 +1,7 @@
 import {
 	collection,
 	deleteDoc,
+	deleteField,
 	doc,
 	DocumentData,
 	DocumentSnapshot,
@@ -12,6 +13,7 @@ import {
 	query,
 	QueryConstraint,
 	setDoc,
+	updateDoc,
 	where,
 	WhereFilterOp,
 } from 'firebase/firestore'
@@ -35,6 +37,14 @@ export default class Colecao {
 			...entidade,
 			id: entidade.id ?? idFinal,
 		}
+	}
+
+	// Apaga campos de um documento existente, sem mexer nos outros
+	async removerCampos(caminho: string, id: string, campos: string[]): Promise<void> {
+		if (!id || !campos.length) return
+		const db = getFirestore(app)
+		const remocoes = Object.fromEntries(campos.map((campo) => [campo, deleteField()]))
+		await updateDoc(doc(db, caminho, id), remocoes)
 	}
 
 	async excluir(caminho: string, id?: string): Promise<boolean> {
