@@ -16,6 +16,7 @@ import {
 	updateDoc,
 	where,
 	WhereFilterOp,
+	writeBatch,
 } from 'firebase/firestore'
 import { app } from '../config/app'
 import Id from '../../core/comum/Id'
@@ -25,6 +26,9 @@ export interface Filtro {
 	op: WhereFilterOp
 	valor: any
 }
+
+// Limite de operações de um writeBatch no Firestore
+const LIMITE_LOTE = 500
 
 export default class Colecao {
 	async salvar(caminho: string, entidade: any, id?: string): Promise<any> {
@@ -37,6 +41,40 @@ export default class Colecao {
 			...entidade,
 			id: entidade.id ?? idFinal,
 		}
+	}
+
+	// Grava vários documentos de uma vez: ou todos são gravados, ou nenhum
+	// (acima de 500 o Firestore exige mais de um lote, e cada lote é independente).
+	// Quem já tem id (ex.: ids fixos de lançamentos gerados) sobrescreve o mesmo documento,
+	// então gravar de novo não duplica.
+	async salvarVarios(caminho: string, entidades: any[]): Promise<any[]> {
+		const db = getFirestore(app)
+		// Mesmo comportamento de salvar(): grava a entidade como veio, no id dela ou num novo
+		const itens = entidades.map((entidade) => ({
+			id: (entidade.id ?? Id.novo()) as string,
+			entidade,
+		}))
+
+		for (const lote of this._dividirEmLotes(itens)) {
+			const batch = writeBatch(db)
+			lote.forEach(({ id, entidade }) => batch.set(doc(db, caminho, id), entidade))
+			await batch.commit()
+		}
+		return itens.map(({ id, entidade }) => ({ ...entidade, id }))
+	}
+
+	// Exclui vários documentos de uma vez (ids que não existem são ignorados)
+	async excluirVarios(caminho: string, ids: string[]): Promise<number> {
+		const idsValidos = [...new Set(ids.filter(Boolean))]
+		if (!idsValidos.length) return 0
+
+		const db = getFirestore(app)
+		for (const lote of this._dividirEmLotes(idsValidos)) {
+			const batch = writeBatch(db)
+			lote.forEach((id) => batch.delete(doc(db, caminho, id)))
+			await batch.commit()
+		}
+		return idsValidos.length
 	}
 
 	// Apaga campos de um documento existente, sem mexer nos outros
@@ -91,6 +129,14 @@ export default class Colecao {
         const resultado = await getDocs(consulta)
         return resultado.docs.map(this._converterDoFirebase) ?? []
     }
+
+	private _dividirEmLotes<T>(itens: T[]): T[][] {
+		const lotes: T[][] = []
+		for (let i = 0; i < itens.length; i += LIMITE_LOTE) {
+			lotes.push(itens.slice(i, i + LIMITE_LOTE))
+		}
+		return lotes
+	}
 
 	private _converterDoFirebase(snapshot: DocumentSnapshot<DocumentData>) {
 		if(!snapshot.exists()) return null 

@@ -64,4 +64,31 @@ export default class Data {
 	static ultimoDiaMes(data: Date) {
 		return new Date(data.getFullYear(), data.getMonth() + 1, 0, 23, 59, 59)
 	}
+
+	// "AAAA-MM" pelo horário local (ex.: 2026-12)
+	static anoMes(data: Date): string {
+		const mes = (data.getMonth() + 1).toString().padStart(2, '0')
+		return `${data.getFullYear()}-${mes}`
+	}
+
+	// Quantos dias o mês tem (mes de 0 a 11)
+	static diasNoMes(ano: number, mes: number): number {
+		return new Date(ano, mes + 1, 0).getDate()
+	}
+
+	// Data no dia pedido; se o mês não tem esse dia (31 em abril, 30 em fevereiro),
+	// usa o último dia do mês. Mês de 0 a 11 (pode passar de 11: vira o ano seguinte).
+	static diaNoMes(ano: number, mes: number, dia: number): Date {
+		const inicio = new Date(ano, mes, 1)
+		const ultimo = Data.diasNoMes(inicio.getFullYear(), inicio.getMonth())
+		return new Date(inicio.getFullYear(), inicio.getMonth(), Math.min(dia, ultimo))
+	}
+
+	// Mesmo dia (e horário) n meses depois, ajustando para o último dia quando preciso:
+	// 31/01 + 1 mês = 28/02 (ou 29/02); 31/01 + 2 meses = 31/03
+	static somarMeses(data: Date, meses: number): Date {
+		const resultado = Data.diaNoMes(data.getFullYear(), data.getMonth() + meses, data.getDate())
+		resultado.setHours(data.getHours(), data.getMinutes(), data.getSeconds(), data.getMilliseconds())
+		return resultado
+	}
 }
